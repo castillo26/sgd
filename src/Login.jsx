@@ -1,23 +1,86 @@
-
-export function Login(){
+export function Login() {
   return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center">Login</h2>
-        <form className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-            <input type="email" id="email" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-200" />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
-            <input type="password" id="password" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-200" />
-          </div>
-          <button type="submit" className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-200">
-            Iniciar Sesión
-          </button>
-        </form>
+    <div className="min-h-screen flex">
+
+      {/* LADO IZQUIERDO - INFORMACIÓN */}
+      <div className="hidden md:flex w-1/2 bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex-col justify-center items-center p-10">
+
+        <h1 className="text-4xl font-bold mb-6 text-center">
+          Sistema de Gestión Documental
+        </h1>
+
+        <p className="text-lg text-center max-w-md opacity-90">
+          Plataforma segura para administrar, almacenar y gestionar
+          documentos de manera eficiente dentro de la organización.
+        </p>
+
       </div>
+
+
+      {/* LADO DERECHO - LOGIN */}
+      <div className="flex w-full md:w-1/2 justify-center items-center bg-gray-100">
+
+        <div className="w-full max-w-md bg-white p-10 rounded-2xl shadow-2xl">
+
+          <h2 className="text-3xl font-bold text-gray-800 text-center mb-2">
+            Bienvenido
+          </h2>
+
+          <p className="text-gray-500 text-center mb-8">
+            Inicia sesión para continuar
+          </p>
+
+
+          <form className="space-y-5">
+
+            {/* EMAIL */}
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Correo electrónico
+              </label>
+
+              <input
+                type="email"
+                placeholder="usuario@empresa.com"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+              />
+            </div>
+
+
+            {/* PASSWORD */}
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Contraseña
+              </label>
+
+              <input
+                type="password"
+                placeholder="••••••••"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+              />
+            </div>
+
+
+            {/* BOTON */}
+            <button
+              type="submit"
+              className="w-full py-3 text-white font-semibold bg-blue-600 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md"
+            >
+              Iniciar sesión
+            </button>
+
+
+            {/* EXTRA */}
+            <div className="text-center text-sm text-gray-500 mt-4">
+              ¿Olvidaste tu contraseña?
+            </div>
+
+          </form>
+
+        </div>
+
+      </div>
+
     </div>
   )
-} 
+}
