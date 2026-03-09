@@ -1,17 +1,17 @@
 import { useState } from "react";
-import { users } from "./users";
 
 export function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const validateEmail = (email) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
     if (!validateEmail(email)) {
@@ -19,29 +19,55 @@ export function Login() {
       return;
     }
 
-    if (password.length < 6) {
-      alert("La contraseña debe tener mínimo 6 caracteres");
+    if (password.length < 4) {
+      alert("La contraseña debe tener mínimo 4 caracteres");
       return;
     }
 
-    const user = users.find(
-      (u) => u.email === email && u.password === password
-    );
+    setLoading(true);
 
-    if (!user) {
-      alert("Credenciales incorrectas");
-      return;
+    try {
+
+      const response = await fetch("http://localhost/sgd-api/login.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          correo: email,
+          contrasena: password
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+
+        localStorage.setItem("user", JSON.stringify(data.usuario));
+
+        window.location.href = "/dashboard";
+
+      } else {
+
+        alert("Credenciales incorrectas");
+
+      }
+
+    } catch (error) {
+
+      console.error(error);
+      alert("Error conectando con el servidor");
+
     }
 
-    localStorage.setItem("user", JSON.stringify(user));
+    setLoading(false);
 
-    window.location.href = "/dashboard";
   };
 
   return (
     <div className="min-h-screen flex">
 
-      {/* LADO IZQUIERDO - INFORMACIÓN */}
+      {/* LADO IZQUIERDO */}
       <div className="hidden md:flex w-1/2 bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex-col justify-center items-center p-10">
 
         <h1 className="text-4xl font-bold mb-6 text-center">
@@ -55,8 +81,7 @@ export function Login() {
 
       </div>
 
-
-      {/* LADO DERECHO - LOGIN */}
+      {/* LADO DERECHO */}
       <div className="flex w-full md:w-1/2 justify-center items-center bg-gray-100">
 
         <div className="w-full max-w-md bg-white p-10 rounded-2xl shadow-2xl">
@@ -68,7 +93,6 @@ export function Login() {
           <p className="text-gray-500 text-center mb-8">
             Inicia sesión para continuar
           </p>
-
 
           <form className="space-y-5" onSubmit={handleLogin}>
 
@@ -84,9 +108,9 @@ export function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+                required
               />
             </div>
-
 
             {/* PASSWORD */}
             <div>
@@ -100,20 +124,19 @@ export function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+                required
               />
             </div>
-
 
             {/* BOTON */}
             <button
               type="submit"
+              disabled={loading}
               className="w-full py-3 text-white font-semibold bg-blue-600 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md"
             >
-              Iniciar sesión
+              {loading ? "Ingresando..." : "Iniciar sesión"}
             </button>
 
-
-            {/* EXTRA */}
             <div className="text-center text-sm text-gray-500 mt-4">
               ¿Olvidaste tu contraseña?
             </div>

@@ -35,13 +35,13 @@ function Dashboard() {
             Ver documentos
           </button>
 
-          {(user.role === "admin" || user.role === "editor") && (
+          {(user.rol === "admin" || user.rol === "editor") && (
             <button className="text-gray-700 hover:text-blue-600 font-medium">
               Subir documentos
             </button>
           )}
 
-          {user.role === "admin" && (
+          {user.rol === "admin" && (
             <button className="text-gray-700 hover:text-blue-600 font-medium">
               Administrar usuarios
             </button>
@@ -67,7 +67,7 @@ function Dashboard() {
         </h2>
 
         <p className="text-gray-500 mb-10">
-          {user.email}
+          {user.correo}
         </p>
 
 
@@ -84,7 +84,7 @@ function Dashboard() {
           </div>
 
 
-          {(user.role === "admin" || user.role === "editor") && (
+          {(user.rol === "admin" || user.rol === "editor") && (
             <div className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
               <h3 className="text-lg font-semibold mb-2">
                 Subir documentos
@@ -96,7 +96,7 @@ function Dashboard() {
           )}
 
 
-          {user.role === "admin" && (
+          {user.rol === "admin" && (
             <div className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
               <h3 className="text-lg font-semibold mb-2">
                 Administración
