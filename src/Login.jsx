@@ -1,4 +1,43 @@
+import { useState } from "react";
+import { users } from "./users";
+
 export function Login() {
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const validateEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+
+    if (!validateEmail(email)) {
+      alert("Correo inválido");
+      return;
+    }
+
+    if (password.length < 6) {
+      alert("La contraseña debe tener mínimo 6 caracteres");
+      return;
+    }
+
+    const user = users.find(
+      (u) => u.email === email && u.password === password
+    );
+
+    if (!user) {
+      alert("Credenciales incorrectas");
+      return;
+    }
+
+    localStorage.setItem("user", JSON.stringify(user));
+
+    window.location.href = "/dashboard";
+  };
+
   return (
     <div className="min-h-screen flex">
 
@@ -31,7 +70,7 @@ export function Login() {
           </p>
 
 
-          <form className="space-y-5">
+          <form className="space-y-5" onSubmit={handleLogin}>
 
             {/* EMAIL */}
             <div>
@@ -42,6 +81,8 @@ export function Login() {
               <input
                 type="email"
                 placeholder="usuario@empresa.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
               />
             </div>
@@ -56,6 +97,8 @@ export function Login() {
               <input
                 type="password"
                 placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
               />
             </div>
