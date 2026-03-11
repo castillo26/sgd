@@ -11,6 +11,8 @@ export function Login() {
     return regex.test(email);
   };
 
+  
+
   const handleLogin = async (e) => {
     e.preventDefault();
 
@@ -61,6 +63,14 @@ export function Login() {
     }
 
     setLoading(false);
+
+    /*if (data.success) {
+
+    localStorage.setItem("user", JSON.stringify(data.user));
+
+    window.location.href = "/dashboard";
+
+    }*/
 
   };
 
