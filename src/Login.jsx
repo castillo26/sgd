@@ -64,13 +64,13 @@ export function Login() {
 
     setLoading(false);
 
-    /*if (data.success) {
+    if (data.success) {
 
     localStorage.setItem("user", JSON.stringify(data.user));
 
     window.location.href = "/dashboard";
 
-    }*/
+    }
 
   };
 

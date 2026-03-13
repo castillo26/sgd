@@ -1,8 +1,11 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import { Login } from "./Login";
 import Dashboard from "./Dashboard";
 import ProtectedRoute from "./ProtectedRoute";
+
+import VerDocumentos from "./VerDocumentos";
+import SubirDocumento from "./SubirDocumento";
 
 function App() {
 
@@ -15,7 +18,7 @@ function App() {
         {/* LOGIN */}
         <Route path="/" element={<Login />} />
 
-        {/* DASHBOARD PROTEGIDO */}
+        {/* DASHBOARD */}
         <Route
           path="/dashboard"
           element={
@@ -24,6 +27,29 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* VER DOCUMENTOS */}
+        <Route
+          path="/documentos"
+          element={
+            <ProtectedRoute>
+              <VerDocumentos />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* SUBIR DOCUMENTOS */}
+        <Route
+          path="/subir"
+          element={
+            <ProtectedRoute>
+              <SubirDocumento />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* REDIRECCIÓN SI LA RUTA NO EXISTE */}
+        <Route path="*" element={<Navigate to="/" />} />
 
       </Routes>
 

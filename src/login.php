@@ -1,12 +1,17 @@
 <?php
-session_start();
+
+header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json");
+
 require_once "config/conexion.php";
 
-$correo = $_POST['correo'];
-$contrasena = $_POST['contrasena'];
+$data = json_decode(file_get_contents("php://input"), true);
 
-$sql = "SELECT * FROM usuarios 
-        WHERE correo='$correo' 
+$correo = $data['correo'];
+$contrasena = $data['contrasena'];
+
+$sql = "SELECT * FROM usuarios
+        WHERE correo='$correo'
         AND contrasena='$contrasena'
         AND estado=1";
 
@@ -16,16 +21,15 @@ if ($resultado->num_rows > 0) {
 
     $usuario = $resultado->fetch_assoc();
 
-    $_SESSION['usuario_id'] = $usuario['id'];
-    $_SESSION['correo'] = $usuario['correo'];
-    $_SESSION['area'] = $usuario['area'];
-
-    header("Location: dashboard.php");
+    echo json_encode([
+        "success" => true,
+        "usuario" => $usuario
+    ]);
 
 } else {
 
-    echo "Usuario o contraseña incorrectos";
+    echo json_encode([
+        "success" => false
+    ]);
 
 }
-
-?>
