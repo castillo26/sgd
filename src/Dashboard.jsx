@@ -3,6 +3,53 @@ import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
 
+const confirmarDerivacion = async () => {
+
+if(!nuevaArea){
+alert("Seleccione un área")
+return
+}
+
+const comentario = prompt("Ingrese comentario (opcional):") || ""
+
+const formData = new FormData()
+formData.append("id", docSeleccionado)
+formData.append("estado", "derivado")
+formData.append("comentario", comentario)
+formData.append("area_destino", nuevaArea)
+
+await fetch("http://localhost/sgd-api/actualizar_estado.php",{
+method:"POST",
+body:formData
+})
+
+setDocSeleccionado(null)
+setNuevaArea("")
+window.location.reload()
+
+}
+
+const actualizarEstado = async (id, nuevoEstado) => {
+
+const comentario = prompt("Ingrese comentario (opcional):") || ""
+
+const formData = new FormData()
+formData.append("id", id)
+formData.append("estado", nuevoEstado)
+formData.append("comentario", comentario)
+formData.append("area_destino", user.area)
+
+await fetch("http://localhost/sgd-api/actualizar_estado.php",{
+method:"POST",
+body:formData
+})
+
+window.location.reload()
+}
+
+  const [nuevaArea, setNuevaArea] = useState("")
+  const [docSeleccionado, setDocSeleccionado] = useState(null)
+
   const [user, setUser] = useState(null);
   const [docs, setDocs] = useState([]);
 
@@ -183,6 +230,38 @@ function Dashboard() {
 
                     </td>
 
+                    <td className="p-3 space-x-2">
+
+                      <button
+                      onClick={()=>actualizarEstado(doc.id,"recibido")}
+                      className="bg-blue-500 text-white px-2 py-1 rounded"
+                      >
+                      Aceptar
+                      </button>
+
+                      <button
+                      onClick={()=>actualizarEstado(doc.id,"en proceso")}
+                      className="bg-yellow-500 text-white px-2 py-1 rounded"
+                      >
+                      Proceso
+                      </button>
+
+                      <button
+                      onClick={()=>actualizarEstado(doc.id,"finalizado")}
+                      className="bg-green-600 text-white px-2 py-1 rounded"
+                      >
+                      Finalizar
+                      </button>
+
+                      <button
+                      onClick={()=>setDocSeleccionado(doc.id)}
+                      className="bg-purple-600 text-white px-2 py-1 rounded"
+                      >
+                      Derivar
+                      </button>
+
+                    </td>
+
                   </tr>
                 ))
               )}
@@ -190,6 +269,34 @@ function Dashboard() {
             </tbody>
 
           </table>
+
+          {docSeleccionado && (
+<div className="mt-6 bg-white p-4 rounded shadow">
+
+<h3 className="mb-2 font-bold">Derivar documento</h3>
+
+<select
+onChange={(e)=>setNuevaArea(e.target.value)}
+className="border p-2 rounded w-full mb-3"
+>
+
+<option value="">Seleccionar área</option>
+<option value="1">Administración</option>
+<option value="2">Contabilidad</option>
+<option value="3">Gerencia</option>
+<option value="4">RRHH</option>
+
+</select>
+
+<button
+onClick={()=>confirmarDerivacion()}
+className="bg-purple-600 text-white px-4 py-2 rounded"
+>
+Confirmar derivación
+</button>
+
+</div>
+)}
 
         </div>
 
