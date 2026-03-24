@@ -57,13 +57,25 @@ const [docSeleccionado, setDocSeleccionado] = useState(null)
 
 const [docs,setDocs] = useState([])
 const [loading,setLoading] = useState(true)
+const [user,setUser] = useState(null)
 const navigate = useNavigate();
 
 useEffect(()=>{
 
-const user = JSON.parse(localStorage.getItem("user"))
+const storedUser = JSON.parse(localStorage.getItem("user"))
+setUser(storedUser)
 
-fetch(`http://localhost/sgd-api/documentos_area.php?area=${user.area}`)
+// CARGAR DOCUMENTOS SEGÚN EL ROL
+let url = "";
+if (storedUser.rol === "admin") {
+  // Admin: ve documentos de su área
+  url = `http://localhost/sgd-api/documentos_area.php?area=${storedUser.area}`;
+} else {
+  // Usuario: ve solo sus propios documentos
+  url = `http://localhost/sgd-api/mis_documentos.php?usuario_id=${storedUser.id}`;
+}
+
+fetch(url)
 .then(res=>res.json())
 .then(data=>{
 setDocs(data)
@@ -97,7 +109,7 @@ return(
 <div className="min-h-screen bg-gray-100 p-10">
 
 <h1 className="text-2xl font-bold mb-6">
-Documentos
+{user && user.rol === "admin" ? "Documentos del área" : "Mis documentos"}
 </h1>
 
 <button
@@ -123,6 +135,7 @@ Volver al Dashboard
 <th className="p-3">Estado</th>
 <th className="p-3">Fecha</th>
 <th className="p-3">Archivo</th>
+{user && user.rol === "admin" && <th className="p-3">Acciones</th>}
 
 </tr>
 
@@ -133,7 +146,7 @@ Volver al Dashboard
 {loading ? (
 
 <tr>
-<td colSpan="6" className="p-6 text-center">
+<td colSpan={user && user.rol === "admin" ? "7" : "6"} className="p-6 text-center">
 Cargando documentos...
 </td>
 </tr>
@@ -141,8 +154,8 @@ Cargando documentos...
 ) : docs.length === 0 ? (
 
 <tr>
-<td colSpan="6" className="p-6 text-center">
-No hay documentos
+<td colSpan={user && user.rol === "admin" ? "7" : "6"} className="p-6 text-center">
+{user && user.rol === "admin" ? "No hay documentos para tu área" : "No has enviado documentos aún"}
 </td>
 </tr>
 
@@ -166,7 +179,14 @@ docs.map(doc=>(
 
 <td className="p-3 text-center">
 
-<span className={`px-3 py-1 rounded-full text-xs ${estadoColor(doc.estado)}`}>
+<span className={`px-3 py-1 rounded-full text-xs ${
+  doc.estado === "enviado" ? "bg-yellow-200 text-yellow-800" :
+  doc.estado === "recibido" ? "bg-blue-200 text-blue-800" :
+  doc.estado === "en proceso" ? "bg-orange-200 text-orange-800" :
+  doc.estado === "derivado" ? "bg-purple-200 text-purple-800" :
+  doc.estado === "finalizado" ? "bg-green-200 text-green-800" :
+  "bg-gray-200"
+}`}>
 {doc.estado}
 </span>
 
@@ -188,7 +208,8 @@ Abrir PDF
 
 </td>
 
-<td className="p-3 space-x-2">
+{user && user.rol === "admin" && (
+                      <td className="p-3 space-x-2">
 
                       <button
                       onClick={()=>actualizarEstado(doc.id,"recibido")}
@@ -219,6 +240,7 @@ Derivar
 </button>
 
                     </td>
+                  )}
 
 </tr>
 
@@ -230,7 +252,7 @@ Derivar
 
 </table>
 
-{docSeleccionado && (
+{user && user.rol === "admin" && docSeleccionado && (
 <div className="mt-6 bg-white p-4 rounded shadow">
 
 <h3 className="mb-2 font-bold">Derivar documento</h3>

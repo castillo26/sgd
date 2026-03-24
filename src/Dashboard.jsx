@@ -67,8 +67,17 @@ window.location.reload()
 
     setUser(parsedUser);
 
-    // DOCUMENTOS DEL ÁREA
-    fetch(`http://localhost/sgd-api/documentos_area.php?area=${parsedUser.area}`)
+    // CARGAR DOCUMENTOS SEGÚN EL ROL
+    let url = "";
+    if (parsedUser.rol === "admin") {
+      // Admin: ve documentos de su área
+      url = `http://localhost/sgd-api/documentos_area.php?area=${parsedUser.area}`;
+    } else {
+      // Usuario: ve solo sus propios documentos
+      url = `http://localhost/sgd-api/mis_documentos.php?usuario_id=${parsedUser.id}`;
+    }
+
+    fetch(url)
       .then(res => res.json())
       .then(data => setDocs(data))
       .catch(err => console.error(err));
@@ -105,14 +114,12 @@ window.location.reload()
             Ver documentos
           </button>
 
-          {(user.rol === "admin" || user.rol === "editor") && (
-            <button
-              className="text-gray-700 hover:text-blue-600 font-medium"
-              onClick={() => navigate("/subir")}
-            >
-              Subir documentos
-            </button>
-          )}
+          <button
+            className="text-gray-700 hover:text-blue-600 font-medium"
+            onClick={() => navigate("/subir")}
+          >
+            {user.rol === "admin" ? "Subir documentos" : "Enviar trámite"}
+          </button>
 
           <button
             onClick={logout}
@@ -146,24 +153,28 @@ window.location.reload()
             onClick={() => navigate("/documentos")}
           >
             <h3 className="text-lg font-semibold mb-2">
-              Ver documentos
+              {user.rol === "admin" ? "Ver documentos" : "Mis documentos"}
             </h3>
             <p className="text-gray-500 text-sm">
-              Consulta los documentos de tu área.
+              {user.rol === "admin"
+                ? "Revisa y gestiona los documentos de tu área."
+                : "Consulta el estado de tus trámites enviados."}
             </p>
           </div>
 
 
-          {(user.rol === "admin" || user.rol === "editor") && (
+          {(user.rol === "admin" || user.rol === "usuario") && (
             <div
               className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition cursor-pointer"
               onClick={() => navigate("/subir")}
             >
               <h3 className="text-lg font-semibold mb-2">
-                Subir documentos
+                {user.rol === "admin" ? "Subir documentos" : "Enviar trámite"}
               </h3>
               <p className="text-gray-500 text-sm">
-                Envía documentos a otras áreas.
+                {user.rol === "admin"
+                  ? "Envía documentos a otras áreas."
+                  : "Envía un documento para iniciar un trámite."}
               </p>
             </div>
           )}
@@ -175,7 +186,7 @@ window.location.reload()
         <div className="bg-white p-6 rounded-xl shadow">
 
           <h3 className="text-xl font-bold mb-6">
-            Documentos recibidos
+            {user.rol === "admin" ? "Documentos recibidos" : "Mis documentos"}
           </h3>
 
           <table className="w-full text-left">
@@ -186,8 +197,10 @@ window.location.reload()
 
                 <th className="py-2">Documento</th>
                 <th className="py-2">Origen</th>
+                <th className="py-2">Destino</th>
                 <th className="py-2">Estado</th>
                 <th className="py-2">PDF</th>
+                {user.rol === "admin" && <th className="py-2">Acciones</th>}
 
               </tr>
 
@@ -197,8 +210,8 @@ window.location.reload()
 
               {docs.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="py-6 text-center text-gray-400">
-                    No hay documentos para tu área
+                  <td colSpan={user.rol === "admin" ? "6" : "5"} className="py-6 text-center text-gray-400">
+                    {user.rol === "admin" ? "No hay documentos para tu área" : "No has enviado documentos aún"}
                   </td>
                 </tr>
               ) : (
@@ -214,7 +227,20 @@ window.location.reload()
                     </td>
 
                     <td className="text-gray-600">
-                      {doc.estado}
+                      {doc.destino}
+                    </td>
+
+                    <td>
+                      <span className={`px-3 py-1 rounded-full text-xs ${
+                        doc.estado === "enviado" ? "bg-yellow-200 text-yellow-800" :
+                        doc.estado === "recibido" ? "bg-blue-200 text-blue-800" :
+                        doc.estado === "en proceso" ? "bg-orange-200 text-orange-800" :
+                        doc.estado === "derivado" ? "bg-purple-200 text-purple-800" :
+                        doc.estado === "finalizado" ? "bg-green-200 text-green-800" :
+                        "bg-gray-200"
+                      }`}>
+                        {doc.estado}
+                      </span>
                     </td>
 
                     <td>
@@ -230,37 +256,39 @@ window.location.reload()
 
                     </td>
 
-                    <td className="p-3 space-x-2">
+                    {user.rol === "admin" && (
+                      <td className="p-3 space-x-2">
 
-                      <button
-                      onClick={()=>actualizarEstado(doc.id,"recibido")}
-                      className="bg-blue-500 text-white px-2 py-1 rounded"
-                      >
-                      Aceptar
-                      </button>
+                        <button
+                        onClick={()=>actualizarEstado(doc.id,"recibido")}
+                        className="bg-blue-500 text-white px-2 py-1 rounded"
+                        >
+                        Aceptar
+                        </button>
 
-                      <button
-                      onClick={()=>actualizarEstado(doc.id,"en proceso")}
-                      className="bg-yellow-500 text-white px-2 py-1 rounded"
-                      >
-                      Proceso
-                      </button>
+                        <button
+                        onClick={()=>actualizarEstado(doc.id,"en proceso")}
+                        className="bg-yellow-500 text-white px-1 rounded"
+                        >
+                        Proceso
+                        </button>
 
-                      <button
-                      onClick={()=>actualizarEstado(doc.id,"finalizado")}
-                      className="bg-green-600 text-white px-2 py-1 rounded"
-                      >
-                      Finalizar
-                      </button>
+                        <button
+                        onClick={()=>actualizarEstado(doc.id,"finalizado")}
+                        className="bg-green-600 text-white px-2 py-1 rounded"
+                        >
+                        Finalizar
+                        </button>
 
-                      <button
-                      onClick={()=>setDocSeleccionado(doc.id)}
-                      className="bg-purple-600 text-white px-2 py-1 rounded"
-                      >
-                      Derivar
-                      </button>
+                        <button
+                        onClick={()=>setDocSeleccionado(doc.id)}
+                        className="bg-purple-600 text-white px-2 py-1 rounded"
+                        >
+                        Derivar
+                        </button>
 
-                    </td>
+                      </td>
+                    )}
 
                   </tr>
                 ))
@@ -270,7 +298,7 @@ window.location.reload()
 
           </table>
 
-          {docSeleccionado && (
+          {user.rol === "admin" && docSeleccionado && (
 <div className="mt-6 bg-white p-4 rounded shadow">
 
 <h3 className="mb-2 font-bold">Derivar documento</h3>
