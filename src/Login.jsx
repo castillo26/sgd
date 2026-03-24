@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export function Login() {
 
@@ -21,8 +22,8 @@ export function Login() {
       return;
     }
 
-    if (password.length < 4) {
-      alert("La contraseña debe tener mínimo 4 caracteres");
+    if (password.length < 6) {
+      alert("La contraseña debe tener mínimo 6 caracteres");
       return;
     }
 
@@ -63,14 +64,6 @@ export function Login() {
     }
 
     setLoading(false);
-
-    if (data.success) {
-
-    localStorage.setItem("user", JSON.stringify(data.user));
-
-    window.location.href = "/dashboard";
-
-    }
 
   };
 
@@ -148,7 +141,10 @@ export function Login() {
             </button>
 
             <div className="text-center text-sm text-gray-500 mt-4">
-              ¿Olvidaste tu contraseña?
+              ¿No tienes cuenta?{" "}
+              <Link to="/register" className="text-blue-600 hover:underline font-medium">
+                Regístrate aquí
+              </Link>
             </div>
 
           </form>

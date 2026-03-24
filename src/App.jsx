@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import { Login } from "./Login";
+import { Register } from "./Register";
 import Dashboard from "./Dashboard";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -17,6 +18,9 @@ function App() {
 
         {/* LOGIN */}
         <Route path="/" element={<Login />} />
+
+        {/* REGISTRO */}
+        <Route path="/register" element={<Register />} />
 
         {/* DASHBOARD */}
         <Route
