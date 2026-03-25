@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 function SubirDocumento(){
@@ -7,8 +7,24 @@ const [nombre,setNombre] = useState("")
 const [archivo,setArchivo] = useState(null)
 const [areaDestino,setAreaDestino] = useState("")
 const [mensaje,setMensaje] = useState("")
+const [tiposDocumento, setTiposDocumento] = useState([])
 
 const navigate = useNavigate()
+
+useEffect(() => {
+    const cargarTipos = async () => {
+        try {
+            const res = await fetch("http://localhost/sgd-api/obtener_tipos.php")
+            const data = await res.json()
+            if (data.success) {
+                setTiposDocumento(data.data)
+            }
+        } catch (err) {
+            console.error("Error al cargar tipos:", err)
+        }
+    }
+    cargarTipos()
+}, [])
 
 const user = JSON.parse(localStorage.getItem("user"))
 
@@ -70,13 +86,19 @@ Subir Documento
 
 <form onSubmit={subir} className="space-y-4">
 
-<input
-type="text"
-placeholder="Nombre del documento"
+<select
 value={nombre}
 onChange={(e)=>setNombre(e.target.value)}
 className="border p-2 w-full rounded"
-/>
+required
+>
+<option value="">Seleccionar tipo de documento</option>
+{tiposDocumento.map((tipo) => (
+    <option key={tipo.doc_codID} value={tipo.tipo}>
+        {tipo.tipo}
+    </option>
+))}
+</select>
 
 <select
 value={areaDestino}
@@ -98,7 +120,7 @@ type="file"
 accept="application/pdf"
 onChange={(e)=>setArchivo(e.target.files[0])}
 />
-
+<br />
 <button
 className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
 >
