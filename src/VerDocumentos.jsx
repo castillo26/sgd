@@ -130,6 +130,7 @@ Volver al Dashboard
 <tr>
 
 <th className="p-3 text-left">Documento</th>
+<th className="p-3">N° Informe</th>
 <th className="p-3">Origen</th>
 <th className="p-3">Destino</th>
 <th className="p-3">Estado</th>
@@ -146,7 +147,7 @@ Volver al Dashboard
 {loading ? (
 
 <tr>
-<td colSpan={user && user.rol === "admin" ? "7" : "6"} className="p-6 text-center">
+<td colSpan={user && user.rol === "admin" ? "8" : "7"} className="p-6 text-center">
 Cargando documentos...
 </td>
 </tr>
@@ -154,7 +155,7 @@ Cargando documentos...
 ) : docs.length === 0 ? (
 
 <tr>
-<td colSpan={user && user.rol === "admin" ? "7" : "6"} className="p-6 text-center">
+<td colSpan={user && user.rol === "admin" ? "8" : "7"} className="p-6 text-center">
 {user && user.rol === "admin" ? "No hay documentos para tu área" : "No has enviado documentos aún"}
 </td>
 </tr>
@@ -167,6 +168,10 @@ docs.map(doc=>(
 
 <td className="p-3">
 {doc.nombre}
+</td>
+
+<td className="p-3 text-center">
+{doc.numero_informe}
 </td>
 
 <td className="p-3 text-center">

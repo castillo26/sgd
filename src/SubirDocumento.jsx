@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 function SubirDocumento(){
 
 const [nombre,setNombre] = useState("")
+const [numeroInforme,setNumeroInforme] = useState("")
 const [archivo,setArchivo] = useState(null)
 const [areaDestino,setAreaDestino] = useState("")
 const [mensaje,setMensaje] = useState("")
@@ -45,6 +46,7 @@ return
 const formData = new FormData()
 
 formData.append("nombre",nombre)
+formData.append("numero_informe",numeroInforme)
 formData.append("archivo",archivo)
 formData.append("usuario_id",user.id)
 formData.append("area_origen",user.area)
@@ -86,19 +88,30 @@ Subir Documento
 
 <form onSubmit={subir} className="space-y-4">
 
+<div className="flex gap-2">
 <select
 value={nombre}
 onChange={(e)=>setNombre(e.target.value)}
-className="border p-2 w-full rounded"
+className="border p-2 w-1/2 rounded"
 required
 >
-<option value="">Seleccionar tipo de documento</option>
+<option value="">Tipo documento</option>
 {tiposDocumento.map((tipo) => (
     <option key={tipo.doc_codID} value={tipo.tipo}>
         {tipo.tipo}
     </option>
 ))}
 </select>
+
+<input
+type="text"
+placeholder="N° Informe"
+value={numeroInforme}
+onChange={(e)=>setNumeroInforme(e.target.value)}
+className="border p-2 w-1/2 rounded"
+required
+/>
+</div>
 
 <select
 value={areaDestino}

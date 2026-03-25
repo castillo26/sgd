@@ -196,6 +196,7 @@ window.location.reload()
               <tr className="border-b">
 
                 <th className="py-2">Documento</th>
+                <th className="py-2">N° Informe</th>
                 <th className="py-2">Origen</th>
                 <th className="py-2">Destino</th>
                 <th className="py-2">Estado</th>
@@ -210,7 +211,7 @@ window.location.reload()
 
               {docs.length === 0 ? (
                 <tr>
-                  <td colSpan={user.rol === "admin" ? "6" : "5"} className="py-6 text-center text-gray-400">
+                  <td colSpan={user.rol === "admin" ? "7" : "6"} className="py-6 text-center text-gray-400">
                     {user.rol === "admin" ? "No hay documentos para tu área" : "No has enviado documentos aún"}
                   </td>
                 </tr>
@@ -220,6 +221,10 @@ window.location.reload()
 
                     <td className="py-3">
                       {doc.nombre}
+                    </td>
+
+                    <td className="py-3">
+                      {doc.numero_informe}
                     </td>
 
                     <td className="text-gray-600">
