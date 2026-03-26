@@ -189,19 +189,19 @@ window.location.reload()
             {user.rol === "admin" ? "Documentos recibidos" : "Mis documentos"}
           </h3>
 
-          <table className="w-full text-left">
+          <table className="w-full text-left border-collapse">
 
             <thead>
 
-              <tr className="border-b">
+              <tr className="bg-gray-100 border-b-2 border-gray-300">
 
-                <th className="py-2">Documento</th>
-                <th className="py-2">N° Informe</th>
-                <th className="py-2">Origen</th>
-                <th className="py-2">Destino</th>
-                <th className="py-2">Estado</th>
-                <th className="py-2">PDF</th>
-                {user.rol === "admin" && <th className="py-2">Acciones</th>}
+                <th className="py-3 px-4 font-semibold text-gray-700">Documento</th>
+                <th className="py-3 px-4 font-semibold text-gray-700">N° Informe</th>
+                <th className="py-3 px-4 font-semibold text-gray-700">Origen</th>
+                <th className="py-3 px-4 font-semibold text-gray-700">Destino</th>
+                <th className="py-3 px-4 font-semibold text-gray-700">Estado</th>
+                <th className="py-3 px-4 font-semibold text-gray-700">PDF</th>
+                {user.rol === "admin" && <th className="py-3 px-4 font-semibold text-gray-700">Acciones</th>}
 
               </tr>
 
@@ -211,50 +211,53 @@ window.location.reload()
 
               {docs.length === 0 ? (
                 <tr>
-                  <td colSpan={user.rol === "admin" ? "7" : "6"} className="py-6 text-center text-gray-400">
+                  <td colSpan={user.rol === "admin" ? "7" : "6"} className="py-8 text-center text-gray-400">
                     {user.rol === "admin" ? "No hay documentos para tu área" : "No has enviado documentos aún"}
                   </td>
                 </tr>
               ) : (
-                docs.map(doc => (
-                  <tr key={doc.id} className="border-b">
+                docs.map((doc, index) => (
+                  <tr
+                    key={doc.id}
+                    className={`border-b border-gray-200 hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                  >
 
-                    <td className="py-3">
+                    <td className="py-4 px-4 font-medium text-gray-800">
                       {doc.nombre}
                     </td>
 
-                    <td className="py-3">
-                      {doc.numero_informe}
+                    <td className="py-4 px-4 text-gray-600">
+                      {doc.numero_informe || '-'}
                     </td>
 
-                    <td className="text-gray-600">
+                    <td className="py-4 px-4 text-gray-600">
                       {doc.origen}
                     </td>
 
-                    <td className="text-gray-600">
+                    <td className="py-4 px-4 text-gray-600">
                       {doc.destino}
                     </td>
 
-                    <td>
-                      <span className={`px-3 py-1 rounded-full text-xs ${
-                        doc.estado === "enviado" ? "bg-yellow-200 text-yellow-800" :
-                        doc.estado === "recibido" ? "bg-blue-200 text-blue-800" :
-                        doc.estado === "en proceso" ? "bg-orange-200 text-orange-800" :
-                        doc.estado === "derivado" ? "bg-purple-200 text-purple-800" :
-                        doc.estado === "finalizado" ? "bg-green-200 text-green-800" :
-                        "bg-gray-200"
+                    <td className="py-4 px-4">
+                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                        doc.estado === "enviado" ? "bg-yellow-100 text-yellow-700 border border-yellow-300" :
+                        doc.estado === "recibido" ? "bg-blue-100 text-blue-700 border border-blue-300" :
+                        doc.estado === "en proceso" ? "bg-orange-100 text-orange-700 border border-orange-300" :
+                        doc.estado === "derivado" ? "bg-purple-100 text-purple-700 border border-purple-300" :
+                        doc.estado === "finalizado" ? "bg-green-100 text-green-700 border border-green-300" :
+                        "bg-gray-100 text-gray-700 border border-gray-300"
                       }`}>
                         {doc.estado}
                       </span>
                     </td>
 
-                    <td>
+                    <td className="py-4 px-4">
 
                       <a
                         href={`http://localhost/sgd-api/${doc.archivo}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
+                        className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
                       >
                         Ver PDF
                       </a>
@@ -262,35 +265,37 @@ window.location.reload()
                     </td>
 
                     {user.rol === "admin" && (
-                      <td className="p-3 space-x-2">
+                      <td className="py-4 px-4">
 
-                        <button
-                        onClick={()=>actualizarEstado(doc.id,"recibido")}
-                        className="bg-blue-500 text-white px-2 py-1 rounded"
-                        >
-                        Aceptar
-                        </button>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                          onClick={()=>actualizarEstado(doc.id,"recibido")}
+                          className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
+                          >
+                          Aceptar
+                          </button>
 
-                        <button
-                        onClick={()=>actualizarEstado(doc.id,"en proceso")}
-                        className="bg-yellow-500 text-white px-1 rounded"
-                        >
-                        Proceso
-                        </button>
+                          <button
+                          onClick={()=>actualizarEstado(doc.id,"en proceso")}
+                          className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
+                          >
+                          Proceso
+                          </button>
 
-                        <button
-                        onClick={()=>actualizarEstado(doc.id,"finalizado")}
-                        className="bg-green-600 text-white px-2 py-1 rounded"
-                        >
-                        Finalizar
-                        </button>
+                          <button
+                          onClick={()=>actualizarEstado(doc.id,"finalizado")}
+                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
+                          >
+                          Finalizar
+                          </button>
 
-                        <button
-                        onClick={()=>setDocSeleccionado(doc.id)}
-                        className="bg-purple-600 text-white px-2 py-1 rounded"
-                        >
-                        Derivar
-                        </button>
+                          <button
+                          onClick={()=>setDocSeleccionado(doc.id)}
+                          className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
+                          >
+                          Derivar
+                          </button>
+                        </div>
 
                       </td>
                     )}
@@ -304,32 +309,34 @@ window.location.reload()
           </table>
 
           {user.rol === "admin" && docSeleccionado && (
-<div className="mt-6 bg-white p-4 rounded shadow">
+            <div className="mt-6 bg-white p-6 rounded-lg shadow-md border border-gray-200">
 
-<h3 className="mb-2 font-bold">Derivar documento</h3>
+              <h3 className="text-lg font-bold text-gray-800 mb-4">
+                Derivar documento
+              </h3>
 
-<select
-onChange={(e)=>setNuevaArea(e.target.value)}
-className="border p-2 rounded w-full mb-3"
->
+              <div className="space-y-4">
+                <select
+                  onChange={(e)=>setNuevaArea(e.target.value)}
+                  className="border border-gray-300 p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
+                  <option value="">Seleccionar área</option>
+                  <option value="1">Administración</option>
+                  <option value="2">Contabilidad</option>
+                  <option value="3">Gerencia</option>
+                  <option value="4">RRHH</option>
+                </select>
 
-<option value="">Seleccionar área</option>
-<option value="1">Administración</option>
-<option value="2">Contabilidad</option>
-<option value="3">Gerencia</option>
-<option value="4">RRHH</option>
+                <button
+                  onClick={()=>confirmarDerivacion()}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                >
+                  Confirmar derivación
+                </button>
+              </div>
 
-</select>
-
-<button
-onClick={()=>confirmarDerivacion()}
-className="bg-purple-600 text-white px-4 py-2 rounded"
->
-Confirmar derivación
-</button>
-
-</div>
-)}
+            </div>
+          )}
 
         </div>
 
