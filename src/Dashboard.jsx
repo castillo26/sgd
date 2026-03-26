@@ -116,6 +116,13 @@ window.location.reload()
 
           <button
             className="text-gray-700 hover:text-blue-600 font-medium"
+            onClick={() => navigate("/archivados")}
+          >
+            Archivados
+          </button>
+
+          <button
+            className="text-gray-700 hover:text-blue-600 font-medium"
             onClick={() => navigate("/subir")}
           >
             {user.rol === "admin" ? "Subir documentos" : "Enviar trámite"}
@@ -161,7 +168,18 @@ window.location.reload()
                 : "Consulta el estado de tus trámites enviados."}
             </p>
           </div>
-
+          
+          <div
+  className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition cursor-pointer"
+  onClick={() => navigate("/archivados")}
+>
+  <h3 className="text-lg font-semibold mb-2">
+    Documentos Archivados
+  </h3>
+  <p className="text-gray-500 text-sm">
+    Consulta todos los documentos finalizados de tu área.
+  </p>
+</div>
 
           {(user.rol === "admin" || user.rol === "usuario") && (
             <div

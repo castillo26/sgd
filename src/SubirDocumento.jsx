@@ -9,10 +9,12 @@ const [archivo,setArchivo] = useState(null)
 const [areaDestino,setAreaDestino] = useState("")
 const [mensaje,setMensaje] = useState("")
 const [tiposDocumento, setTiposDocumento] = useState([])
+const [areas, setAreas] = useState([]) // 👈 NUEVO
 
 const navigate = useNavigate()
 
 useEffect(() => {
+
     const cargarTipos = async () => {
         try {
             const res = await fetch("http://localhost/sgd-api/obtener_tipos.php")
@@ -24,7 +26,22 @@ useEffect(() => {
             console.error("Error al cargar tipos:", err)
         }
     }
+
+    const cargarAreas = async () => {
+        try {
+            const res = await fetch("http://localhost/sgd-api/obtener_areas.php")
+            const data = await res.json()
+            if (data.success) {
+                setAreas(data.data)
+            }
+        } catch (err) {
+            console.error("Error al cargar áreas:", err)
+        }
+    }
+
     cargarTipos()
+    cargarAreas()
+
 }, [])
 
 const user = JSON.parse(localStorage.getItem("user"))
@@ -50,7 +67,9 @@ formData.append("numero_informe",numeroInforme)
 formData.append("archivo",archivo)
 formData.append("usuario_id",user.id)
 formData.append("area_origen",user.area)
-formData.append("area_destino",areaDestino)
+
+// 👇 IMPORTANTE (envía ID numérico)
+formData.append("area_destino", parseInt(areaDestino))
 
 try{
 
@@ -113,6 +132,7 @@ required
 />
 </div>
 
+{/* 👇 SELECT DINÁMICO */}
 <select
 value={areaDestino}
 onChange={(e)=>setAreaDestino(e.target.value)}
@@ -121,10 +141,12 @@ required
 >
 
 <option value="">Seleccionar área destino</option>
-<option value="1">Administración</option>
-<option value="2">Contabilidad</option>
-<option value="3">Gerencia</option>
-<option value="4">RRHH</option>
+
+{areas.map((area) => (
+    <option key={area.id} value={area.id}>
+        {area.nombre_area}
+    </option>
+))}
 
 </select>
 
@@ -133,7 +155,9 @@ type="file"
 accept="application/pdf"
 onChange={(e)=>setArchivo(e.target.files[0])}
 />
+
 <br />
+
 <button
 className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
 >
@@ -154,9 +178,7 @@ Subir Documento
 onClick={()=>navigate("/dashboard")}
 className="bg-gray-500 text-white px-5 py-2 rounded hover:bg-gray-600"
 >
-
 Volver al Dashboard
-
 </button>
 
 </div>

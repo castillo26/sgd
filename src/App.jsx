@@ -8,6 +8,8 @@ import ProtectedRoute from "./ProtectedRoute";
 import VerDocumentos from "./VerDocumentos";
 import SubirDocumento from "./SubirDocumento";
 
+import DocumentosArchivados from "./DocumentosArchivados";
+
 function App() {
 
   return (
@@ -54,6 +56,16 @@ function App() {
 
         {/* REDIRECCIÓN SI LA RUTA NO EXISTE */}
         <Route path="*" element={<Navigate to="/" />} />
+
+        {/* DOCUMENTOS ARCHIVADOS */}
+        <Route
+          path="/archivados"
+          element={
+            <ProtectedRoute>
+              <DocumentosArchivados />
+            </ProtectedRoute>
+          }
+        />
 
       </Routes>
 
