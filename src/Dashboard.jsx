@@ -18,15 +18,22 @@ formData.append("estado", "derivado")
 formData.append("comentario", comentario)
 formData.append("area_destino", nuevaArea)
 
+try {
 await fetch("http://localhost/sgd-api/actualizar_estado.php",{
 method:"POST",
 body:formData
 })
 
+// Actualizar estado local sin recargar la página
+setDocs(prevDocs => prevDocs.map(doc =>
+  String(doc.id) === String(docSeleccionado) ? { ...doc, estado: "derivado" } : doc
+))
+
 setDocSeleccionado(null)
 setNuevaArea("")
-window.location.reload()
-
+} catch (error) {
+console.error("Error al derivar:", error)
+}
 }
 
 const actualizarEstado = async (id, nuevoEstado) => {
@@ -39,12 +46,24 @@ formData.append("estado", nuevoEstado)
 formData.append("comentario", comentario)
 formData.append("area_destino", user.area)
 
-await fetch("http://localhost/sgd-api/actualizar_estado.php",{
+try {
+const response = await fetch("http://localhost/sgd-api/actualizar_estado.php",{
 method:"POST",
 body:formData
 })
 
-window.location.reload()
+const result = await response.json()
+console.log("Respuesta servidor:", result)
+
+if (response.ok) {
+  // Actualizar estado local sin recargar la página
+  setDocs(prevDocs => prevDocs.map(doc =>
+    String(doc.id) === String(id) ? { ...doc, estado: nuevoEstado } : doc
+  ))
+}
+} catch (error) {
+console.error("Error al actualizar estado:", error)
+}
 }
 
   const [nuevaArea, setNuevaArea] = useState("")
@@ -105,37 +124,12 @@ window.location.reload()
           SGD
         </h1>
 
-        <div className="flex gap-6">
-
-          <button
-            className="text-gray-700 hover:text-blue-600 font-medium"
-            onClick={() => navigate("/documentos")}
-          >
-            Ver documentos
-          </button>
-
-          <button
-            className="text-gray-700 hover:text-blue-600 font-medium"
-            onClick={() => navigate("/archivados")}
-          >
-            Archivados
-          </button>
-
-          <button
-            className="text-gray-700 hover:text-blue-600 font-medium"
-            onClick={() => navigate("/subir")}
-          >
-            {user.rol === "admin" ? "Subir documentos" : "Enviar trámite"}
-          </button>
-
-          <button
-            onClick={logout}
-            className="text-red-500 hover:text-red-600 font-medium"
-          >
-            Cerrar sesión
-          </button>
-
-        </div>
+        <button
+          onClick={logout}
+          className="text-red-500 hover:text-red-600 font-medium"
+        >
+          Cerrar sesión
+        </button>
 
       </div>
 

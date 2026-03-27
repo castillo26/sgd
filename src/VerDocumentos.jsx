@@ -18,15 +18,22 @@ formData.append("estado", "derivado")
 formData.append("comentario", comentario)
 formData.append("area_destino", nuevaArea)
 
+try {
 await fetch("http://localhost/sgd-api/actualizar_estado.php",{
 method:"POST",
 body:formData
 })
 
+// Actualizar estado local sin recargar la página
+setDocs(prevDocs => prevDocs.map(doc =>
+  String(doc.id) === String(docSeleccionado) ? { ...doc, estado: "derivado" } : doc
+))
+
 setDocSeleccionado(null)
 setNuevaArea("")
-window.location.reload()
-
+} catch (error) {
+console.error("Error al derivar:", error)
+}
 }
 
 const actualizarEstado = async (id, nuevoEstado, derivar = false) => {
@@ -44,12 +51,19 @@ formData.append("estado", nuevoEstado)
 formData.append("comentario", comentario)
 formData.append("area_destino", nuevaArea)
 
+try {
 await fetch("http://localhost/sgd-api/actualizar_estado.php",{
 method:"POST",
 body:formData
 })
 
-window.location.reload()
+// Actualizar estado local sin recargar la página
+setDocs(prevDocs => prevDocs.map(doc =>
+  String(doc.id) === String(id) ? { ...doc, estado: nuevoEstado } : doc
+))
+} catch (error) {
+console.error("Error al actualizar estado:", error)
+}
 }
 
 const [nuevaArea, setNuevaArea] = useState("")
