@@ -19,7 +19,7 @@ formData.append("comentario", comentario)
 formData.append("area_destino", nuevaArea)
 
 try {
-await fetch("http://localhost/sgd-api/actualizar_estado.php",{
+await fetch("https://sgd.munihualmay.gob.pe/sgd-api/actualizar_estado.php",{
 method:"POST",
 body:formData
 })
@@ -38,7 +38,18 @@ console.error("Error al derivar:", error)
 
 const actualizarEstado = async (id, nuevoEstado) => {
 
-const comentario = prompt("Ingrese comentario (opcional):") || ""
+let comentario = ""
+
+// Si es estado observado, el comentario es obligatorio
+if(nuevoEstado === "observado"){
+  comentario = prompt("Ingrese la observación/motivo (OBLIGATORIO):") || ""
+  if(!comentario.trim()){
+    alert("La observación es obligatoria para documentos observados")
+    return
+  }
+} else {
+  comentario = prompt("Ingrese comentario (opcional):") || ""
+}
 
 const formData = new FormData()
 formData.append("id", id)
@@ -47,7 +58,7 @@ formData.append("comentario", comentario)
 formData.append("area_destino", user.area)
 
 try {
-const response = await fetch("http://localhost/sgd-api/actualizar_estado.php",{
+const response = await fetch("https://sgd.munihualmay.gob.pe/sgd-api/actualizar_estado.php",{
 method:"POST",
 body:formData
 })
@@ -58,7 +69,7 @@ console.log("Respuesta servidor:", result)
 if (response.ok) {
   // Actualizar estado local sin recargar la página
   setDocs(prevDocs => prevDocs.map(doc =>
-    String(doc.id) === String(id) ? { ...doc, estado: nuevoEstado } : doc
+    String(doc.id) === String(id) ? { ...doc, estado: nuevoEstado, comentario: comentario } : doc
   ))
 }
 } catch (error) {
@@ -90,10 +101,10 @@ console.error("Error al actualizar estado:", error)
     let url = "";
     if (parsedUser.rol === "admin") {
       // Admin: ve documentos de su área
-      url = `http://localhost/sgd-api/documentos_area.php?area=${parsedUser.area}`;
+      url = `https://sgd.munihualmay.gob.pe/sgd-api/documentos_area.php?area=${parsedUser.area}`;
     } else {
       // Usuario: ve solo sus propios documentos
-      url = `http://localhost/sgd-api/mis_documentos.php?usuario_id=${parsedUser.id}`;
+      url = `https://sgd.munihualmay.gob.pe/sgd-api/mis_documentos.php?usuario_id=${parsedUser.id}`;
     }
 
     fetch(url)
@@ -147,14 +158,28 @@ console.error("Error al actualizar estado:", error)
 
 
         {/* TARJETAS */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+
+          {user.rol === "admin" && (
+            <div
+              className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition cursor-pointer"
+              onClick={() => navigate("/mis-documentos")}
+            >
+              <h3 className="text-lg font-semibold mb-2">
+                Mis documentos enviados
+              </h3>
+              <p className="text-gray-500 text-sm">
+                Consulta el seguimiento de los trámites que has enviado.
+              </p>
+            </div>
+          )}
 
           <div
             className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition cursor-pointer"
             onClick={() => navigate("/documentos")}
           >
             <h3 className="text-lg font-semibold mb-2">
-              {user.rol === "admin" ? "Ver documentos" : "Mis documentos"}
+              {user.rol === "admin" ? "Documentos recibidos" : "Mis documentos"}
             </h3>
             <p className="text-gray-500 text-sm">
               {user.rol === "admin"
@@ -212,6 +237,7 @@ console.error("Error al actualizar estado:", error)
                 <th className="py-3 px-4 font-semibold text-gray-700">Origen</th>
                 <th className="py-3 px-4 font-semibold text-gray-700">Destino</th>
                 <th className="py-3 px-4 font-semibold text-gray-700">Estado</th>
+                <th className="py-3 px-4 font-semibold text-gray-700">Observación</th>
                 <th className="py-3 px-4 font-semibold text-gray-700">PDF</th>
                 {user.rol === "admin" && <th className="py-3 px-4 font-semibold text-gray-700">Acciones</th>}
 
@@ -223,7 +249,7 @@ console.error("Error al actualizar estado:", error)
 
               {docs.length === 0 ? (
                 <tr>
-                  <td colSpan={user.rol === "admin" ? "7" : "6"} className="py-8 text-center text-gray-400">
+                  <td colSpan={user.rol === "admin" ? "8" : "7"} className="py-8 text-center text-gray-400">
                     {user.rol === "admin" ? "No hay documentos para tu área" : "No has enviado documentos aún"}
                   </td>
                 </tr>
@@ -257,6 +283,7 @@ console.error("Error al actualizar estado:", error)
                         doc.estado === "en proceso" ? "bg-orange-100 text-orange-700 border border-orange-300" :
                         doc.estado === "derivado" ? "bg-purple-100 text-purple-700 border border-purple-300" :
                         doc.estado === "finalizado" ? "bg-green-100 text-green-700 border border-green-300" :
+                        doc.estado === "observado" ? "bg-red-100 text-red-700 border border-red-300" :
                         "bg-gray-100 text-gray-700 border border-gray-300"
                       }`}>
                         {doc.estado}
@@ -264,9 +291,19 @@ console.error("Error al actualizar estado:", error)
                     </td>
 
                     <td className="py-4 px-4">
+                      {doc.comentario ? (
+                        <span className="text-red-600 text-xs" title={doc.comentario}>
+                          {doc.comentario.length > 30 ? doc.comentario.substring(0, 30) + "..." : doc.comentario}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-xs">-</span>
+                      )}
+                    </td>
+
+                    <td className="py-4 px-4">
 
                       <a
-                        href={`http://localhost/sgd-api/${doc.archivo}`}
+                        href={`https://sgd.munihualmay.gob.pe/sgd-api/${doc.archivo}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
@@ -280,33 +317,55 @@ console.error("Error al actualizar estado:", error)
                       <td className="py-4 px-4">
 
                         <div className="flex flex-wrap gap-2">
-                          <button
-                          onClick={()=>actualizarEstado(doc.id,"recibido")}
-                          className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
-                          >
-                          Aceptar
-                          </button>
+                          {/* Aceptar: Solo cuando está en "enviado" */}
+                          {doc.estado === "enviado" && (
+                            <button
+                              onClick={()=>actualizarEstado(doc.id,"recibido")}
+                              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
+                            >
+                              Aceptar
+                            </button>
+                          )}
 
-                          <button
-                          onClick={()=>actualizarEstado(doc.id,"en proceso")}
-                          className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
-                          >
-                          Proceso
-                          </button>
+                          {/* Proceso: Solo cuando ya fue aceptado */}
+                          {doc.estado === "recibido" && (
+                            <button
+                              onClick={()=>actualizarEstado(doc.id,"en proceso")}
+                              className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
+                            >
+                              Proceso
+                            </button>
+                          )}
 
-                          <button
-                          onClick={()=>actualizarEstado(doc.id,"finalizado")}
-                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
-                          >
-                          Finalizar
-                          </button>
+                          {/* Finalizar: Solo cuando ya fue aceptado */}
+                          {(doc.estado === "recibido" || doc.estado === "en proceso") && (
+                            <button
+                              onClick={()=>actualizarEstado(doc.id,"finalizado")}
+                              className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
+                            >
+                              Finalizar
+                            </button>
+                          )}
 
-                          <button
-                          onClick={()=>setDocSeleccionado(doc.id)}
-                          className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
-                          >
-                          Derivar
-                          </button>
+                          {/* Derivar: Cuando fue aceptado o está en proceso */}
+                          {(doc.estado === "recibido" || doc.estado === "en proceso") && (
+                            <button
+                              onClick={()=>setDocSeleccionado(doc.id)}
+                              className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
+                            >
+                              Derivar
+                            </button>
+                          )}
+
+                          {/* Observar: Cuando fue aceptado o está en proceso */}
+                          {(doc.estado === "recibido" || doc.estado === "en proceso") && (
+                            <button
+                              onClick={()=>actualizarEstado(doc.id,"observado")}
+                              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
+                            >
+                              Observar
+                            </button>
+                          )}
                         </div>
 
                       </td>

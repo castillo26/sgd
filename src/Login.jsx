@@ -31,7 +31,7 @@ export function Login() {
 
     try {
 
-      const response = await fetch("http://localhost/sgd-api/login.php", {
+      const response = await fetch("https://sgd.munihualmay.gob.pe/sgd-api/login.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

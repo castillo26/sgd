@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 export function Register() {
@@ -8,6 +8,22 @@ export function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [area, setArea] = useState("");
   const [loading, setLoading] = useState(false);
+  const [areas, setAreas] = useState([]);
+
+  useEffect(() => {
+    const cargarAreas = async () => {
+      try {
+        const res = await fetch("https://sgd.munihualmay.gob.pe/sgd-api/obtener_areas.php");
+        const data = await res.json();
+        if (data.success) {
+          setAreas(data.data);
+        }
+      } catch (err) {
+        console.error("Error al cargar áreas:", err);
+      }
+    };
+    cargarAreas();
+  }, []);
 
   const validateEmail = (email) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -41,7 +57,7 @@ export function Register() {
 
     try {
 
-      const response = await fetch("http://localhost/sgd-api/register.php", {
+      const response = await fetch("https://sgd.munihualmay.gob.pe/sgd-api/register.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -123,10 +139,11 @@ export function Register() {
                 required
               >
                 <option value="">Selecciona un área</option>
-                <option value="1">Administración</option>
-                <option value="2">Contabilidad</option>
-                <option value="3">Gerencia</option>
-                <option value="4">RRHH</option>
+                {areas.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.nombre_area}
+                  </option>
+                ))}
               </select>
             </div>
 

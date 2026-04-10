@@ -7,6 +7,7 @@ import ProtectedRoute from "./ProtectedRoute";
 
 import VerDocumentos from "./VerDocumentos";
 import SubirDocumento from "./SubirDocumento";
+import MisDocumentosAdmin from "./MisDocumentosAdmin";
 
 import DocumentosArchivados from "./DocumentosArchivados";
 
@@ -63,6 +64,16 @@ function App() {
           element={
             <ProtectedRoute>
               <DocumentosArchivados />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* MIS DOCUMENTOS ADMIN */}
+        <Route
+          path="/mis-documentos"
+          element={
+            <ProtectedRoute>
+              <MisDocumentosAdmin />
             </ProtectedRoute>
           }
         />

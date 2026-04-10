@@ -17,7 +17,7 @@ useEffect(() => {
 
     const cargarTipos = async () => {
         try {
-            const res = await fetch("http://localhost/sgd-api/obtener_tipos.php")
+            const res = await fetch("https://sgd.munihualmay.gob.pe/sgd-api/obtener_tipos.php")
             const data = await res.json()
             if (data.success) {
                 setTiposDocumento(data.data)
@@ -29,7 +29,7 @@ useEffect(() => {
 
     const cargarAreas = async () => {
         try {
-            const res = await fetch("http://localhost/sgd-api/obtener_areas.php")
+            const res = await fetch("https://sgd.munihualmay.gob.pe/sgd-api/obtener_areas.php")
             const data = await res.json()
             if (data.success) {
                 setAreas(data.data)
@@ -73,7 +73,7 @@ formData.append("area_destino", parseInt(areaDestino))
 
 try{
 
-const res = await fetch("http://localhost/sgd-api/subir_documento.php",{
+const res = await fetch("https://sgd.munihualmay.gob.pe/sgd-api/subir_documento.php",{
 method:"POST",
 body:formData
 })
