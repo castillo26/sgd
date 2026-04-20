@@ -3,6 +3,14 @@ import { useNavigate } from "react-router-dom";
 
 function VerDocumentos(){
 
+const [areas, setAreas] = useState([]);
+
+useEffect(() => {
+  fetch("http://localhost/sgd-api/areas.php")
+    .then(res => res.json())
+    .then(data => setAreas(data))
+}, [])
+
 const confirmarDerivacion = async () => {
 
 if(!nuevaArea){
@@ -156,8 +164,7 @@ Volver al Dashboard
 
 <th className="p-3 text-left">Documento</th>
 <th className="p-3">N° Informe</th>
-<th className="p-3">Origen</th>
-<th className="p-3">Destino</th>
+{user && user.rol !== "admin" && <th className="p-3">Destino</th>}
 <th className="p-3">Estado</th>
 <th className="p-3">Observación</th>
 <th className="p-3">Fecha</th>
@@ -173,7 +180,7 @@ Volver al Dashboard
 {loading ? (
 
 <tr>
-<td colSpan={user && user.rol === "admin" ? "9" : "8"} className="p-6 text-center">
+<td colSpan={user && user.rol === "admin" ? "7" : "7"} className="p-6 text-center">
 Cargando documentos...
 </td>
 </tr>
@@ -181,7 +188,7 @@ Cargando documentos...
 ) : docs.length === 0 ? (
 
 <tr>
-<td colSpan={user && user.rol === "admin" ? "9" : "8"} className="p-6 text-center">
+<td colSpan={user && user.rol === "admin" ? "7" : "7"} className="p-6 text-center">
 {user && user.rol === "admin" ? "No hay documentos para tu área" : "No has enviado documentos aún"}
 </td>
 </tr>
@@ -200,13 +207,11 @@ docs.map(doc=>(
 {doc.numero_informe}
 </td>
 
-<td className="p-3 text-center">
-{doc.origen}
-</td>
-
+{user && user.rol !== "admin" && (
 <td className="p-3 text-center">
 {doc.destino}
 </td>
+)}
 
 <td className="p-3 text-center">
 
@@ -252,54 +257,46 @@ Abrir PDF
 
 {user && user.rol === "admin" && (
                       <td className="p-3 space-x-2">
-                      {/* Aceptar: Solo cuando está en "enviado" */}
+                      {/* Aceptar y Observar: Solo cuando está en "enviado" */}
                       {doc.estado === "enviado" && (
-                        <button
-                          onClick={()=>actualizarEstado(doc.id,"recibido")}
-                          className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-                        >
-                          Aceptar
-                        </button>
+                        <>
+                          <button
+                            onClick={()=>actualizarEstado(doc.id,"recibido")}
+                            className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                          >
+                            Aceptar
+                          </button>
+                          <button
+                            onClick={()=>actualizarEstado(doc.id,"observado")}
+                            className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                          >
+                            Observar
+                          </button>
+                        </>
                       )}
 
-                      {/* Proceso: Solo cuando ya fue aceptado */}
-                      {doc.estado === "recibido" && (
-                        <button
-                          onClick={()=>actualizarEstado(doc.id,"en proceso")}
-                          className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
-                        >
-                          Proceso
-                        </button>
-                      )}
-
-                      {/* Finalizar: Solo cuando ya fue aceptado */}
+                      {/* Responder, Finalizar, Derivar: Cuando ya fue aceptado o está en proceso */}
                       {(doc.estado === "recibido" || doc.estado === "en proceso") && (
-                        <button
-                          onClick={()=>actualizarEstado(doc.id,"finalizado")}
-                          className="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
-                        >
-                          Finalizar
-                        </button>
-                      )}
-
-                      {/* Derivar: Cuando fue aceptado o está en proceso */}
-                      {(doc.estado === "recibido" || doc.estado === "en proceso") && (
-                        <button
-                          onClick={()=>setDocSeleccionado(doc.id)}
-                          className="bg-purple-600 text-white px-2 py-1 rounded hover:bg-purple-700"
-                        >
-                          Derivar
-                        </button>
-                      )}
-
-                      {/* Observar: Cuando fue aceptado o está en proceso */}
-                      {(doc.estado === "recibido" || doc.estado === "en proceso") && (
-                        <button
-                          onClick={()=>actualizarEstado(doc.id,"observado")}
-                          className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                        >
-                          Observar
-                        </button>
+                        <>
+                          <button
+                            onClick={()=>actualizarEstado(doc.id,"en proceso")}
+                            className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
+                          >
+                            Responder
+                          </button>
+                          <button
+                            onClick={()=>actualizarEstado(doc.id,"finalizado")}
+                            className="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+                          >
+                            Finalizar
+                          </button>
+                          <button
+                            onClick={()=>setDocSeleccionado(doc.id)}
+                            className="bg-purple-600 text-white px-2 py-1 rounded hover:bg-purple-700"
+                          >
+                            Derivar
+                          </button>
+                        </>
                       )}
                     </td>
                   )}
@@ -320,16 +317,15 @@ Abrir PDF
 <h3 className="mb-2 font-bold">Derivar documento</h3>
 
 <select
-onChange={(e)=>setNuevaArea(e.target.value)}
-className="border p-2 rounded w-full mb-3"
+  onChange={(e)=>setNuevaArea(e.target.value)}
+  className="border p-2 rounded w-full mb-3"
 >
-
-<option value="">Seleccionar área</option>
-<option value="1">Administración</option>
-<option value="2">Contabilidad</option>
-<option value="3">Gerencia</option>
-<option value="4">RRHH</option>
-
+  <option value="">Seleccionar área</option>
+  {areas.map(area => (
+    <option key={area.id} value={area.id}>
+      {area.nombre_area}
+    </option>
+  ))}
 </select>
 
 <button

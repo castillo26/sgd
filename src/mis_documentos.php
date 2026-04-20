@@ -15,7 +15,7 @@ if ($usuario_id <= 0) {
 // Consultar documentos enviados por el usuario con información de áreas y observación
 $stmt = $conn->prepare("
     SELECT d.id, d.nombre, d.numero_informe, d.archivo, d.estado, d.comentario,
-           d.fecha_subida, d.fecha_actualizacion,
+           d.fecha_subida, d.fecha_actualizacion, d.fecha_aceptacion,
            ao.nombre_area as origen,
            ad.nombre_area as destino
     FROM documentos d
@@ -41,7 +41,8 @@ while ($row = $result->fetch_assoc()) {
         'origen' => $row['origen'],
         'destino' => $row['destino'],
         'fecha_subida' => $row['fecha_subida'],
-        'fecha_actualizacion' => $row['fecha_actualizacion']
+        'fecha_actualizacion' => $row['fecha_actualizacion'],
+        'fecha_aceptacion' => $row['fecha_aceptacion']
     ];
 }
 

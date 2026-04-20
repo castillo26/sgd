@@ -56,6 +56,7 @@ formData.append("id", id)
 formData.append("estado", nuevoEstado)
 formData.append("comentario", comentario)
 formData.append("area_destino", user.area)
+formData.append("usuario_id", user.id)
 
 try {
 const response = await fetch("http://localhost/sgd-api/actualizar_estado.php",{
@@ -234,10 +235,10 @@ console.error("Error al actualizar estado:", error)
 
                 <th className="py-3 px-4 font-semibold text-gray-700">Documento</th>
                 <th className="py-3 px-4 font-semibold text-gray-700">N° Informe</th>
-                <th className="py-3 px-4 font-semibold text-gray-700">Origen</th>
-                <th className="py-3 px-4 font-semibold text-gray-700">Destino</th>
+                {user.rol !== "admin" && <th className="py-3 px-4 font-semibold text-gray-700">Destino</th>}
                 <th className="py-3 px-4 font-semibold text-gray-700">Estado</th>
                 <th className="py-3 px-4 font-semibold text-gray-700">Observación</th>
+                <th className="py-3 px-4 font-semibold text-gray-700">Fecha Aceptación</th>
                 <th className="py-3 px-4 font-semibold text-gray-700">PDF</th>
                 {user.rol === "admin" && <th className="py-3 px-4 font-semibold text-gray-700">Acciones</th>}
 
@@ -249,7 +250,7 @@ console.error("Error al actualizar estado:", error)
 
               {docs.length === 0 ? (
                 <tr>
-                  <td colSpan={user.rol === "admin" ? "8" : "7"} className="py-8 text-center text-gray-400">
+                  <td colSpan={user.rol === "admin" ? "6" : "6"} className="py-8 text-center text-gray-400">
                     {user.rol === "admin" ? "No hay documentos para tu área" : "No has enviado documentos aún"}
                   </td>
                 </tr>
@@ -268,13 +269,11 @@ console.error("Error al actualizar estado:", error)
                       {doc.numero_informe || '-'}
                     </td>
 
-                    <td className="py-4 px-4 text-gray-600">
-                      {doc.origen}
-                    </td>
-
+                    {user.rol !== "admin" && (
                     <td className="py-4 px-4 text-gray-600">
                       {doc.destino}
                     </td>
+                    )}
 
                     <td className="py-4 px-4">
                       <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
@@ -300,71 +299,69 @@ console.error("Error al actualizar estado:", error)
                       )}
                     </td>
 
-                    <td className="py-4 px-4">
+                    <td className="py-4 px-4 text-gray-600 text-sm">
+  {doc.fecha_aceptacion ? (
+    new Date(doc.fecha_aceptacion).toLocaleString('es-PE')
+  ) : (
+    <span className="text-gray-400">-</span>
+  )}
+</td>
 
-                      <a
-                        href={`http://localhost/sgd-api/${doc.archivo}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
-                      >
-                        Ver PDF
-                      </a>
-
-                    </td>
+<td className="py-4 px-4">
+  <a
+    href={`http://localhost/sgd-api/${doc.archivo}`}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+  >
+    Ver PDF
+  </a>
+</td>
 
                     {user.rol === "admin" && (
                       <td className="py-4 px-4">
 
                         <div className="flex flex-wrap gap-2">
-                          {/* Aceptar: Solo cuando está en "enviado" */}
+                          {/* Aceptar y Observar: Solo cuando está en "enviado" */}
                           {doc.estado === "enviado" && (
-                            <button
-                              onClick={()=>actualizarEstado(doc.id,"recibido")}
-                              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
-                            >
-                              Aceptar
-                            </button>
+                            <>
+                              <button
+                                onClick={()=>actualizarEstado(doc.id,"recibido")}
+                                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
+                              >
+                                Aceptar
+                              </button>
+                              <button
+                                onClick={()=>actualizarEstado(doc.id,"observado")}
+                                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
+                              >
+                                Observar
+                              </button>
+                            </>
                           )}
 
-                          {/* Proceso: Solo cuando ya fue aceptado */}
-                          {doc.estado === "recibido" && (
-                            <button
-                              onClick={()=>actualizarEstado(doc.id,"en proceso")}
-                              className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
-                            >
-                              Proceso
-                            </button>
-                          )}
-
-                          {/* Finalizar: Solo cuando ya fue aceptado */}
+                          {/* Responder, Finalizar, Derivar: Cuando ya fue aceptado o está en proceso */}
                           {(doc.estado === "recibido" || doc.estado === "en proceso") && (
-                            <button
-                              onClick={()=>actualizarEstado(doc.id,"finalizado")}
-                              className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
-                            >
-                              Finalizar
-                            </button>
-                          )}
-
-                          {/* Derivar: Cuando fue aceptado o está en proceso */}
-                          {(doc.estado === "recibido" || doc.estado === "en proceso") && (
-                            <button
-                              onClick={()=>setDocSeleccionado(doc.id)}
-                              className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
-                            >
-                              Derivar
-                            </button>
-                          )}
-
-                          {/* Observar: Cuando fue aceptado o está en proceso */}
-                          {(doc.estado === "recibido" || doc.estado === "en proceso") && (
-                            <button
-                              onClick={()=>actualizarEstado(doc.id,"observado")}
-                              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
-                            >
-                              Observar
-                            </button>
+                            <>
+                              <button
+                                onClick={()=>actualizarEstado(doc.id,"en proceso")}
+                                className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
+                              >
+                                Responder
+                              </button>
+                              <button
+                                onClick={()=>actualizarEstado(doc.id,"finalizado")}
+                                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
+                              >
+                                Finalizar
+                              </button>
+                              <button
+                                onClick={()=>setDocSeleccionado(doc.id)}
+                                className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
+                              >
+                                Derivar
+                              </button>
+                            </>
                           )}
                         </div>
 

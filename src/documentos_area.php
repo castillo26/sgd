@@ -14,15 +14,34 @@ if ($area <= 0) {
 
 // Consultar documentos del área con información de áreas y observación
 $stmt = $conn->prepare("
-    SELECT d.id, d.nombre, d.numero_informe, d.archivo, d.estado, d.comentario,
-           d.fecha_subida, d.fecha_actualizacion,
-           ao.nombre_area as origen,
-           ad.nombre_area as destino
-    FROM documentos d
-    LEFT JOIN areas ao ON d.area_origen = ao.id
-    LEFT JOIN areas ad ON d.area_destino = ad.id
-    WHERE d.area_destino = ?
-    ORDER BY d.fecha_subida DESC
+    SELECT 
+    d.id, 
+    d.nombre, 
+    d.numero_informe, 
+    d.archivo, 
+    d.estado, 
+    d.comentario,
+    d.fecha_subida, 
+    d.fecha_actualizacion,
+
+    -- ✅ Fecha real de aceptación
+    (
+        SELECT s.fecha 
+        FROM seguimiento_documento s 
+        WHERE s.documento_id = d.id 
+        AND s.estado = 'recibido'
+        ORDER BY s.fecha ASC 
+        LIMIT 1
+    ) AS fecha_aceptacion,
+
+    ao.nombre_area as origen,
+    ad.nombre_area as destino
+
+FROM documentos d
+LEFT JOIN areas ao ON d.area_origen = ao.id
+LEFT JOIN areas ad ON d.area_destino = ad.id
+WHERE d.area_destino = ?
+ORDER BY d.fecha_subida DESC
 ");
 
 $stmt->bind_param("i", $area);
@@ -41,7 +60,8 @@ while ($row = $result->fetch_assoc()) {
         'origen' => $row['origen'],
         'destino' => $row['destino'],
         'fecha_subida' => $row['fecha_subida'],
-        'fecha_actualizacion' => $row['fecha_actualizacion']
+        'fecha_actualizacion' => $row['fecha_actualizacion'],
+        'fecha_aceptacion' => $row['fecha_aceptacion']
     ];
 }
 

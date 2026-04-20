@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import SubsanarDocumento from "./SubsanarDocumento";
 
 function MisDocumentosAdmin() {
   const [user, setUser] = useState(null);
   const [docs, setDocs] = useState([]);
+  const [documentoSubsanar, setDocumentoSubsanar] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,12 +19,21 @@ function MisDocumentosAdmin() {
 
     setUser(parsedUser);
 
-    // Cargar documentos enviados por el administrador
+    // Cargar documentos enviados por el usuario
     fetch(`http://localhost/sgd-api/documentos_admin.php?usuario_id=${parsedUser.id}`)
       .then(res => res.json())
       .then(data => setDocs(data))
       .catch(err => console.error(err));
   }, [navigate]);
+
+  const cargarDocumentos = () => {
+    if (user) {
+      fetch(`http://localhost/sgd-api/documentos_admin.php?usuario_id=${user.id}`)
+        .then(res => res.json())
+        .then(data => setDocs(data))
+        .catch(err => console.error(err));
+    }
+  };
 
   const logout = () => {
     localStorage.removeItem("user");
@@ -74,18 +85,19 @@ function MisDocumentosAdmin() {
               <tr className="bg-gray-100 border-b-2 border-gray-300">
                 <th className="py-3 px-4 font-semibold text-gray-700">Documento</th>
                 <th className="py-3 px-4 font-semibold text-gray-700">N° Informe</th>
-                <th className="py-3 px-4 font-semibold text-gray-700">Origen</th>
                 <th className="py-3 px-4 font-semibold text-gray-700">Destino</th>
                 <th className="py-3 px-4 font-semibold text-gray-700">Estado</th>
                 <th className="py-3 px-4 font-semibold text-gray-700">Observación</th>
+                <th className="py-3 px-4 font-semibold text-gray-700">Fecha Aceptación</th>
                 <th className="py-3 px-4 font-semibold text-gray-700">PDF</th>
+                <th className="py-3 px-4 font-semibold text-gray-700">Acciones</th>
               </tr>
             </thead>
 
             <tbody>
               {docs.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="py-8 text-center text-gray-400">
+                  <td colSpan="8" className="py-8 text-center text-gray-400">
                     No has enviado documentos aún
                   </td>
                 </tr>
@@ -100,9 +112,6 @@ function MisDocumentosAdmin() {
                     </td>
                     <td className="py-4 px-4 text-gray-600">
                       {doc.numero_informe || '-'}
-                    </td>
-                    <td className="py-4 px-4 text-gray-600">
-                      {doc.origen}
                     </td>
                     <td className="py-4 px-4 text-gray-600">
                       {doc.destino}
@@ -129,6 +138,19 @@ function MisDocumentosAdmin() {
                         <span className="text-gray-400 text-xs">-</span>
                       )}
                     </td>
+                    <td className="py-4 px-4 text-gray-600 text-sm">
+                      {doc.fecha_aceptacion ? (
+                        new Date(doc.fecha_aceptacion).toLocaleString('es-PE', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
                     <td className="py-4 px-4">
                       <a
                         href={`http://localhost/sgd-api/${doc.archivo}`}
@@ -139,6 +161,16 @@ function MisDocumentosAdmin() {
                         Ver PDF
                       </a>
                     </td>
+                    <td className="py-4 px-4">
+                      {doc.estado === "observado" && (
+                        <button
+                          onClick={() => setDocumentoSubsanar(doc)}
+                          className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
+                        >
+                          Subsanar
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))
               )}
@@ -146,6 +178,18 @@ function MisDocumentosAdmin() {
           </table>
         </div>
       </div>
+
+      {/* Modal de Subsanación */}
+      {documentoSubsanar && (
+        <SubsanarDocumento
+          documento={documentoSubsanar}
+          onCancelar={() => setDocumentoSubsanar(null)}
+          onSubsanado={() => {
+            setDocumentoSubsanar(null);
+            cargarDocumentos();
+          }}
+        />
+      )}
     </div>
   );
 }

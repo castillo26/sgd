@@ -10,6 +10,7 @@ $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
 $estado = isset($_POST['estado']) ? $_POST['estado'] : '';
 $comentario = isset($_POST['comentario']) ? $_POST['comentario'] : '';
 $area_destino = isset($_POST['area_destino']) ? intval($_POST['area_destino']) : 0;
+$usuario_id = isset($_POST['usuario_id']) ? intval($_POST['usuario_id']) : 0;
 
 // Validar datos obligatorios
 if ($id <= 0 || empty($estado)) {
@@ -30,6 +31,15 @@ if ($estado === 'observado' && empty(trim($comentario))) {
 }
 
 try {
+    // Obtener el estado actual del documento
+    $stmtEstado = $conn->prepare("SELECT estado FROM documentos WHERE id = ?");
+    $stmtEstado->bind_param("i", $id);
+    $stmtEstado->execute();
+    $resultEstado = $stmtEstado->get_result();
+    $docActual = $resultEstado->fetch_assoc();
+    $estado_anterior = $docActual ? $docActual['estado'] : '';
+    $stmtEstado->close();
+
     // Preparar la consulta según el estado
     if ($estado === 'observado') {
         // Cuando se observa, se actualiza el estado y se guarda la observación
@@ -43,14 +53,27 @@ try {
         $stmt->bind_param("ii", $area_destino, $id);
     } elseif ($estado === 'recibido') {
         // Cuando se acepta, se guarda el comentario como observación (si existe)
+        // y se registra la fecha de aceptación
         if (!empty(trim($comentario))) {
-            $stmt = $conn->prepare("UPDATE documentos SET estado = ?, comentario = ?, fecha_actualizacion = NOW() WHERE id = ?");
+            $stmt = $conn->prepare("UPDATE documentos SET estado = ?, comentario = ?, fecha_aceptacion = NOW(), fecha_actualizacion = NOW() WHERE id = ?");
             $stmt->bind_param("ssi", $estado, $comentario, $id);
         } else {
-            $stmt = $conn->prepare("UPDATE documentos SET estado = ?, fecha_actualizacion = NOW() WHERE id = ?");
+            $stmt = $conn->prepare("UPDATE documentos SET estado = ?, fecha_aceptacion = NOW(), fecha_actualizacion = NOW() WHERE id = ?");
             $stmt->bind_param("si", $estado, $id);
         }
-    } elseif ($estado === 'finalizado') {
+    }/*  elseif ($estado === 'subsanado') {
+        // Cuando se subsana un documento observado, se actualiza el archivo y el estado
+        $archivo = isset($_POST['archivo']) ? $_POST['archivo'] : '';
+        if (empty($archivo)) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'El archivo es obligatorio para subsanar'
+            ]);
+            exit;
+        }
+        $stmt = $conn->prepare("UPDATE documentos SET estado = 'enviado', archivo = ?, comentario = NULL, fecha_actualizacion = NOW() WHERE id = ?");
+        $stmt->bind_param("si", $archivo, $id);
+    } */ elseif ($estado === 'finalizado') {
         // Cuando se finaliza, se puede guardar un comentario final
         if (!empty(trim($comentario))) {
             $stmt = $conn->prepare("UPDATE documentos SET estado = ?, comentario = ?, fecha_actualizacion = NOW() WHERE id = ?");
@@ -66,6 +89,16 @@ try {
     }
 
     if ($stmt->execute()) {
+        // Registrar en el historial
+        $stmtHistorial = $conn->prepare("
+INSERT INTO seguimiento_documento (documento_id, area_id, estado, comentario, fecha) 
+VALUES (?, ?, ?, ?, NOW())
+");
+
+$stmtHistorial->bind_param("iiss", $id, $area_destino, $estado, $comentario);
+        $stmtHistorial->execute();
+        $stmtHistorial->close();
+
         echo json_encode([
             'success' => true,
             'message' => 'Estado actualizado correctamente',
