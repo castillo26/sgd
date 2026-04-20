@@ -19,7 +19,7 @@ formData.append("comentario", comentario)
 formData.append("area_destino", nuevaArea)
 
 try {
-await fetch("https://sgd.munihualmay.gob.pe/sgd-api/actualizar_estado.php",{
+await fetch("http://localhost/sgd-api/actualizar_estado.php",{
 method:"POST",
 body:formData
 })
@@ -58,7 +58,7 @@ formData.append("comentario", comentario)
 formData.append("area_destino", user.area)
 
 try {
-const response = await fetch("https://sgd.munihualmay.gob.pe/sgd-api/actualizar_estado.php",{
+const response = await fetch("http://localhost/sgd-api/actualizar_estado.php",{
 method:"POST",
 body:formData
 })
@@ -101,10 +101,10 @@ console.error("Error al actualizar estado:", error)
     let url = "";
     if (parsedUser.rol === "admin") {
       // Admin: ve documentos de su área
-      url = `https://sgd.munihualmay.gob.pe/sgd-api/documentos_area.php?area=${parsedUser.area}`;
+      url = `http://localhost/sgd-api/documentos_area.php?area=${parsedUser.area}`;
     } else {
       // Usuario: ve solo sus propios documentos
-      url = `https://sgd.munihualmay.gob.pe/sgd-api/mis_documentos.php?usuario_id=${parsedUser.id}`;
+      url = `http://localhost/sgd-api/mis_documentos.php?usuario_id=${parsedUser.id}`;
     }
 
     fetch(url)
@@ -153,7 +153,7 @@ console.error("Error al actualizar estado:", error)
         </h2>
 
         <p className="text-gray-500 mb-10">
-          {user.correo}
+          {user.usuario}
         </p>
 
 
@@ -303,7 +303,7 @@ console.error("Error al actualizar estado:", error)
                     <td className="py-4 px-4">
 
                       <a
-                        href={`https://sgd.munihualmay.gob.pe/sgd-api/${doc.archivo}`}
+                        href={`http://localhost/sgd-api/${doc.archivo}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:text-blue-800 hover:underline font-medium"

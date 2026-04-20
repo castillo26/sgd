@@ -3,9 +3,8 @@ import { Link } from "react-router-dom";
 
 export function Register() {
 
-  const [email, setEmail] = useState("");
+  const [usuario, setUsuario] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [area, setArea] = useState("");
   const [loading, setLoading] = useState(false);
   const [areas, setAreas] = useState([]);
@@ -13,7 +12,7 @@ export function Register() {
   useEffect(() => {
     const cargarAreas = async () => {
       try {
-        const res = await fetch("https://sgd.munihualmay.gob.pe/sgd-api/obtener_areas.php");
+        const res = await fetch("http://localhost/sgd-api/obtener_areas.php");
         const data = await res.json();
         if (data.success) {
           setAreas(data.data);
@@ -25,26 +24,16 @@ export function Register() {
     cargarAreas();
   }, []);
 
-  const validateEmail = (email) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  };
-
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    if (!validateEmail(email)) {
-      alert("Correo inválido");
+    if (usuario.trim().length < 3) {
+      alert("El usuario debe tener al menos 3 caracteres");
       return;
     }
 
-    if (password.length < 6) {
-      alert("La contraseña debe tener mínimo 6 caracteres");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      alert("Las contraseñas no coinciden");
+    if (!password.trim()) {
+      alert("Ingresa tu contraseña");
       return;
     }
 
@@ -57,13 +46,13 @@ export function Register() {
 
     try {
 
-      const response = await fetch("https://sgd.munihualmay.gob.pe/sgd-api/register.php", {
+      const response = await fetch("http://localhost/sgd-api/register.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          correo: email,
+          usuario: usuario,
           contrasena: password,
           area: parseInt(area)
         })
@@ -112,16 +101,16 @@ export function Register() {
 
           <form className="space-y-5" onSubmit={handleRegister}>
 
-            {/* EMAIL */}
+            {/* USUARIO */}
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">
-                Correo electrónico
+                Usuario
               </label>
               <input
-                type="email"
-                placeholder="usuario@empresa.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                placeholder="Nombre de usuario"
+                value={usuario}
+                onChange={(e) => setUsuario(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition"
                 required
               />
@@ -154,24 +143,9 @@ export function Register() {
               </label>
               <input
                 type="password"
-                placeholder="••••••••"
+                placeholder="Contraseña asignada"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition"
-                required
-              />
-            </div>
-
-            {/* CONFIRMAR PASSWORD */}
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Confirmar contraseña
-              </label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition"
                 required
               />

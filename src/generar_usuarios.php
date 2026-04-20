@@ -4,8 +4,13 @@
 // Ejecutar este script una vez para generar los INSERT SQL
 // =============================================
 
-// Generar hash de la contraseña '123456'
-$hash = password_hash('123456', PASSWORD_DEFAULT);
+// Contraseñas predefinidas según rol
+$PASSWORD_ADMIN = '123456';
+$PASSWORD_USUARIO = '123';
+
+// Generar hashes de las contraseñas
+$hash_admin = password_hash($PASSWORD_ADMIN, PASSWORD_DEFAULT);
+$hash_usuario = password_hash($PASSWORD_USUARIO, PASSWORD_DEFAULT);
 
 // Áreas nuevas (del 5 al 25 según la tabla proporcionada)
 $areas = [
@@ -33,21 +38,33 @@ $areas = [
 ];
 
 // Generar los INSERT SQL
-echo "-- Hash generado para contraseña '123456':\n";
-echo "-- " . $hash . "\n\n";
+echo "-- =============================================\n";
+echo "-- Hash generado para contraseña '123456' (admin):\n";
+echo "-- " . $hash_admin . "\n\n";
+echo "-- Hash generado para contraseña '123' (usuario):\n";
+echo "-- " . $hash_usuario . "\n\n";
 echo "-- INSERT SQL para nuevos usuarios:\n\n";
 
 foreach ($areas as $id => $nombre) {
-    $admin_email = "admin_" . strtolower(str_replace(' ', '', $nombre)) . "@gmail.com";
-    $user_email = "usuario_" . strtolower(str_replace(' ', '', $nombre)) . "@gmail.com";
+    // Generar nombre de usuario simple (sin @)
+    $nombre_simple = strtolower(str_replace(' ', '', $nombre));
 
-    echo "INSERT INTO usuarios (correo, contraseña, area, estado, rol) VALUES\n";
-    echo "('{$admin_email}', '{$hash}', {$id}, 1, 'admin'),\n";
-    echo "('{$user_email}', '{$hash}', {$id}, 1, 'usuario');\n\n";
+    // Solo OTI (área 14) tiene admin
+    if ($id == 14) {
+        $admin_user = "admin_{$nombre_simple}";
+        echo "INSERT INTO usuarios (usuario, contrasena, area, estado, rol) VALUES\n";
+        echo "('{$admin_user}', '{$hash_admin}', {$id}, 1, 'admin');\n\n";
+    }
+
+    // Todos tienen usuario normal
+    $user_user = "usuario_{$nombre_simple}";
+    echo "INSERT INTO usuarios (usuario, contrasena, area, estado, rol) VALUES\n";
+    echo "('{$user_user}', '{$hash_usuario}', {$id}, 1, 'usuario');\n\n";
 }
 
 echo "\n-- =============================================\n";
-echo "-- También ejecutar este ALTER TABLE primero:\n";
-echo "-- ALTER TABLE documentos ADD COLUMN comentario TEXT NULL DEFAULT NULL AFTER estado;\n";
+echo "-- NOTA IMPORTANTE:\n";
+echo "-- - Contraseña para USUARIOS: 123\n";
+echo "-- - Contraseña para ADMIN (solo OTI): 123456\n";
 echo "-- =============================================\n";
 ?>

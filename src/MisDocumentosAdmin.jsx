@@ -18,7 +18,7 @@ function MisDocumentosAdmin() {
     setUser(parsedUser);
 
     // Cargar documentos enviados por el administrador
-    fetch(`https://sgd.munihualmay.gob.pe/sgd-api/documentos_admin.php?usuario_id=${parsedUser.id}`)
+    fetch(`http://localhost/sgd-api/documentos_admin.php?usuario_id=${parsedUser.id}`)
       .then(res => res.json())
       .then(data => setDocs(data))
       .catch(err => console.error(err));
@@ -60,7 +60,7 @@ function MisDocumentosAdmin() {
           Mis Documentos Enviados
         </h2>
         <p className="text-gray-500 mb-10">
-          Seguimiento de los documentos que has enviado - {user.correo}
+          Seguimiento de los documentos que has enviado - {user.usuario}
         </p>
 
         {/* TABLA DE DOCUMENTOS */}
@@ -131,7 +131,7 @@ function MisDocumentosAdmin() {
                     </td>
                     <td className="py-4 px-4">
                       <a
-                        href={`https://sgd.munihualmay.gob.pe/sgd-api/${doc.archivo}`}
+                        href={`http://localhost/sgd-api/${doc.archivo}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:text-blue-800 hover:underline font-medium"

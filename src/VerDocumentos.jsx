@@ -19,7 +19,7 @@ formData.append("comentario", comentario)
 formData.append("area_destino", nuevaArea)
 
 try {
-await fetch("https://sgd.munihualmay.gob.pe/sgd-api/actualizar_estado.php",{
+await fetch("http://localhost/sgd-api/actualizar_estado.php",{
 method:"POST",
 body:formData
 })
@@ -63,7 +63,7 @@ formData.append("comentario", comentario)
 formData.append("area_destino", nuevaArea)
 
 try {
-await fetch("https://sgd.munihualmay.gob.pe/sgd-api/actualizar_estado.php",{
+await fetch("http://localhost/sgd-api/actualizar_estado.php",{
 method:"POST",
 body:formData
 })
@@ -94,10 +94,10 @@ setUser(storedUser)
 let url = "";
 if (storedUser.rol === "admin") {
   // Admin: ve documentos de su área (recibidos) Y los que envió
-  url = `https://sgd.munihualmay.gob.pe/sgd-api/documentos_area.php?area=${storedUser.area}&usuario_id=${storedUser.id}`;
+  url = `http://localhost/sgd-api/documentos_area.php?area=${storedUser.area}&usuario_id=${storedUser.id}`;
 } else {
   // Usuario: ve solo sus propios documentos
-  url = `https://sgd.munihualmay.gob.pe/sgd-api/mis_documentos.php?usuario_id=${storedUser.id}`;
+  url = `http://localhost/sgd-api/mis_documentos.php?usuario_id=${storedUser.id}`;
 }
 
 fetch(url)
@@ -241,7 +241,7 @@ docs.map(doc=>(
 <td className="p-3 text-center">
 
 <a
-href={`https://sgd.munihualmay.gob.pe/sgd-api/${doc.archivo}`}
+href={`http://localhost/sgd-api/${doc.archivo}`}
 target="_blank"
 className="text-blue-600 hover:underline"
 >

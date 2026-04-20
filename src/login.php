@@ -9,11 +9,10 @@ require_once "conexion.php";
 
 $data = json_decode(file_get_contents("php://input"), true);
 
-$correo = $data['correo'] ?? '';
+$area = $data['area'] ?? '';
 $contrasena = $data['contrasena'] ?? '';
 
-// Validaciones
-if (empty($correo) || empty($contrasena)) {
+if (empty($area) || empty($contrasena)) {
     echo json_encode([
         "success" => false,
         "message" => "Todos los campos son obligatorios"
@@ -21,57 +20,35 @@ if (empty($correo) || empty($contrasena)) {
     exit;
 }
 
-// Buscar usuario por correo (usando prepared statement para prevenir SQL injection)
-$stmt = $conn->prepare("SELECT id, correo, contrasena, area, estado, rol FROM usuarios WHERE correo = ?");
-$stmt->bind_param("s", $correo);
+// Buscar TODOS los usuarios de esa área
+$stmt = $conn->prepare("SELECT id, usuario, contrasena, area, estado, rol FROM usuarios WHERE area = ?");
+$stmt->bind_param("i", $area);
 $stmt->execute();
 $resultado = $stmt->get_result();
 
-if ($resultado->num_rows > 0) {
-    $usuario = $resultado->fetch_assoc();
+$usuarioEncontrado = null;
 
-    // Verificar que el usuario esté activo
-    if ($usuario['estado'] != 1) {
-        echo json_encode([
-            "success" => false,
-            "message" => "Usuario inactivo"
-        ]);
-        $stmt->close();
-        exit;
+while ($row = $resultado->fetch_assoc()) {
+
+    if ($row['estado'] != 1) continue;
+
+    if (password_verify($contrasena, $row['contrasena'])) {
+        $usuarioEncontrado = $row;
+        break;
     }
+}
 
-    // Verificar la contraseña
-    // Primero verificar si es un hash bcrypt (nuevos usuarios)
-    // Si no funciona, intentar comparación directa (usuarios antiguos con contraseñas en texto plano)
-    $passwordValid = false;
+if ($usuarioEncontrado) {
 
-    if (password_verify($contrasena, $usuario['contrasena'])) {
-        $passwordValid = true;
-    } elseif ($contrasena === $usuario['contrasena']) {
-        // Contraseña en texto plano - actualizar a bcrypt
-        $hash_contrasena = password_hash($contrasena, PASSWORD_BCRYPT);
-        $updateStmt = $conn->prepare("UPDATE usuarios SET contrasena = ? WHERE id = ?");
-        $updateStmt->bind_param("si", $hash_contrasena, $usuario['id']);
-        $updateStmt->execute();
-        $updateStmt->close();
-        $passwordValid = true;
-    }
+    unset($usuarioEncontrado['contrasena']);
 
-    if ($passwordValid) {
-        // No enviar el hash de la contraseña al frontend
-        unset($usuario['contrasena']);
+    echo json_encode([
+        "success" => true,
+        "usuario" => $usuarioEncontrado
+    ]);
 
-        echo json_encode([
-            "success" => true,
-            "usuario" => $usuario
-        ]);
-    } else {
-        echo json_encode([
-            "success" => false,
-            "message" => "Credenciales incorrectas"
-        ]);
-    }
 } else {
+
     echo json_encode([
         "success" => false,
         "message" => "Credenciales incorrectas"

@@ -9,12 +9,12 @@ require_once "conexion.php";
 
 $data = json_decode(file_get_contents("php://input"), true);
 
-$correo = $data['correo'] ?? '';
+$usuario = $data['usuario'] ?? '';
 $contrasena = $data['contrasena'] ?? '';
 $area = $data['area'] ?? 1;
 
 // Validaciones
-if (empty($correo) || empty($contrasena)) {
+if (empty($usuario) || empty($contrasena)) {
     echo json_encode([
         "success" => false,
         "message" => "Todos los campos son obligatorios"
@@ -22,34 +22,51 @@ if (empty($correo) || empty($contrasena)) {
     exit;
 }
 
-// Validar formato de email
-if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+// Validar longitud mínima de usuario
+if (strlen($usuario) < 3) {
     echo json_encode([
         "success" => false,
-        "message" => "Formato de correo inválido"
+        "message" => "El usuario debe tener al menos 3 caracteres"
     ]);
     exit;
 }
 
-// Validar longitud mínima de contraseña
-if (strlen($contrasena) < 6) {
+// Contraseñas predefinidas según rol
+$PASSWORD_ADMIN = '123456';
+$PASSWORD_USUARIO = '123';
+
+// Determinar rol según contraseña y área
+$rol = '';
+if ($contrasena === $PASSWORD_ADMIN) {
+    // Solo OTI (área 14) puede tener administradores
+    if ($area != 14) {
+        echo json_encode([
+            "success" => false,
+            "message" => "La contraseña de administrador solo es válida para el área OTI"
+        ]);
+        exit;
+    }
+    $rol = 'admin';
+} elseif ($contrasena === $PASSWORD_USUARIO) {
+    $rol = 'usuario';
+} else {
     echo json_encode([
         "success" => false,
-        "message" => "La contraseña debe tener al menos 6 caracteres"
+        "message" => "Contraseña inválida. Contacte al administrador."
     ]);
     exit;
 }
 
-// Verificar si el correo ya existe (usando prepared statement)
-$stmt = $conn->prepare("SELECT id FROM usuarios WHERE correo = ?");
-$stmt->bind_param("s", $correo);
+// Verificar si el usuario ya existe (usando prepared statement)
+$stmt = $conn->prepare("SELECT id FROM usuarios WHERE usuario = ?");
+$stmt->bind_param("s", $usuario);
 $stmt->execute();
 $resultado = $stmt->get_result();
 
 if ($resultado->num_rows > 0) {
     echo json_encode([
         "success" => false,
-        "message" => "El correo ya está registrado"
+        "message" => "El usuario ya está registrado"
     ]);
     $stmt->close();
     exit;
@@ -59,12 +76,9 @@ $stmt->close();
 // Encriptar la contraseña con bcrypt
 $hash_contrasena = password_hash($contrasena, PASSWORD_BCRYPT);
 
-// Rol por defecto para nuevos usuarios
-$rol = "usuario";
-
 // Insertar nuevo usuario (usando prepared statement)
-$stmt = $conn->prepare("INSERT INTO usuarios (correo, contrasena, area, estado, rol) VALUES (?, ?, ?, 1, ?)");
-$stmt->bind_param("ssis", $correo, $hash_contrasena, $area, $rol);
+$stmt = $conn->prepare("INSERT INTO usuarios (usuario, contrasena, area, estado, rol) VALUES (?, ?, ?, 1, ?)");
+$stmt->bind_param("ssis", $usuario, $hash_contrasena, $area, $rol);
 
 if ($stmt->execute()) {
     echo json_encode([

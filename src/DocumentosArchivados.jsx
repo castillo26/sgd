@@ -21,7 +21,7 @@ function DocumentosArchivados() {
     setUser(storedUser)
 
     // 🔥 CARGAR SOLO ARCHIVADOS
-    fetch(`https://sgd.munihualmay.gob.pe/sgd-api/documentos_archivados.php?area=${storedUser.area}`)
+    fetch(`http://localhost/sgd-api/documentos_archivados.php?area=${storedUser.area}`)
       .then(res => res.json())
       .then(data => {
         setDocs(data)
@@ -119,7 +119,7 @@ function DocumentosArchivados() {
 
                   <td className="p-3 text-center">
                     <a
-                      href={`https://sgd.munihualmay.gob.pe/sgd-api/${doc.archivo}`}
+                      href={`http://localhost/sgd-api/${doc.archivo}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:underline"
