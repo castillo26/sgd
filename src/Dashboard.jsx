@@ -68,10 +68,18 @@ const result = await response.json()
 console.log("Respuesta servidor:", result)
 
 if (response.ok) {
-  // Actualizar estado local sin recargar la página
-  setDocs(prevDocs => prevDocs.map(doc =>
-    String(doc.id) === String(id) ? { ...doc, estado: nuevoEstado, comentario: comentario } : doc
-  ))
+  // 🔥 Recargar documentos desde el backend
+  let url = "";
+
+  if (user.rol === "admin") {
+    url = `http://localhost/sgd-api/documentos_area.php?area=${user.area}`;
+  } else {
+    url = `http://localhost/sgd-api/mis_documentos.php?usuario_id=${user.id}`;
+  }
+
+  const updated = await fetch(url);
+  const data = await updated.json();
+  setDocs(data);
 }
 } catch (error) {
 console.error("Error al actualizar estado:", error)
@@ -238,7 +246,7 @@ console.error("Error al actualizar estado:", error)
                 {user.rol !== "admin" && <th className="py-3 px-4 font-semibold text-gray-700">Destino</th>}
                 <th className="py-3 px-4 font-semibold text-gray-700">Estado</th>
                 <th className="py-3 px-4 font-semibold text-gray-700">Observación</th>
-                <th className="py-3 px-4 font-semibold text-gray-700">Fecha Aceptación</th>
+                <th className="py-3 px-4 font-semibold text-gray-700">Fecha Actualización</th>
                 <th className="py-3 px-4 font-semibold text-gray-700">PDF</th>
                 {user.rol === "admin" && <th className="py-3 px-4 font-semibold text-gray-700">Acciones</th>}
 
@@ -300,23 +308,30 @@ console.error("Error al actualizar estado:", error)
                     </td>
 
                     <td className="py-4 px-4 text-gray-600 text-sm">
-  {doc.fecha_aceptacion ? (
-    new Date(doc.fecha_aceptacion).toLocaleString('es-PE')
+  {(doc.fecha_aceptacion || doc.fecha_actualizacion) ? (
+    new Date(doc.fecha_aceptacion || doc.fecha_actualizacion)
+      .toLocaleString('es-PE', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
   ) : (
     <span className="text-gray-400">-</span>
   )}
 </td>
 
-<td className="py-4 px-4">
-  <a
-    href={`http://localhost/sgd-api/${doc.archivo}`}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
-  >
-    Ver PDF
-  </a>
-</td>
+                    <td className="py-4 px-4">
+                      <a
+                        href={`http://localhost/sgd-api/${doc.archivo}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                      >
+                        Ver PDF
+                      </a>
+                    </td>
 
                     {user.rol === "admin" && (
                       <td className="py-4 px-4">

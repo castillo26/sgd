@@ -14,26 +14,16 @@ if ($usuario_id <= 0) {
 
 // Consultar documentos que el admin ha enviado (su seguimiento)
 $stmt = $conn->prepare("
-    SELECT 
-    d.id, 
-    d.nombre, 
-    d.numero_informe, 
-    d.archivo, 
-    d.estado, 
+    SELECT
+    d.id,
+    d.nombre,
+    d.numero_informe,
+    d.archivo,
+    d.estado,
     d.comentario,
-    d.fecha_subida, 
+    d.fecha_subida,
     d.fecha_actualizacion,
-
-    -- 🔥 Fecha de aceptación real desde historial
-    (
-        SELECT s.fecha 
-        FROM seguimiento_documento s 
-        WHERE s.documento_id = d.id 
-        AND s.estado = 'recibido'
-        ORDER BY s.fecha ASC 
-        LIMIT 1
-    ) AS fecha_aceptacion,
-
+    d.fecha_aceptacion,
     ao.nombre_area as origen,
     ad.nombre_area as destino
 

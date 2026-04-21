@@ -62,11 +62,11 @@ if (!move_uploaded_file($archivo['tmp_name'], $rutaArchivo)) {
 // Insertar en la base de datos
 try {
     $stmt = $conn->prepare("
-        INSERT INTO documentos (nombre, numero_informe, archivo, usuario_id, area_origen, area_destino, estado, fecha_subida, fecha_actualizacion)
+        INSERT INTO documentos (nombre, numero_informe, archivo, usuario_id, area_origen_id, area_destino_id, estado, fecha_subida, fecha_actualizacion)
         VALUES (?, ?, ?, ?, ?, ?, 'enviado', NOW(), NOW())
     ");
 
-    $stmt->bind_param("sssiii", $nombre, $numero_informe, $rutaArchivo, $usuario_id, $area_origen, $area_destino);
+    $stmt->bind_param("sssiii", $nombre, $numero_informe, $rutaArchivo, $usuario_id, $area_origen_id, $area_destino_id);
 
     if ($stmt->execute()) {
         echo json_encode([

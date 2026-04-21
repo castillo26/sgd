@@ -5,50 +5,41 @@ header('Access-Control-Allow-Origin: *');
 include 'conexion.php';
 
 // Recibir el área del admin
-$area = isset($_GET['area']) ? intval($_GET['area']) : 0;
+$area_destino_id = isset($_GET['area']) ? intval($_GET['area']) : 0;
 
-if ($area <= 0) {
+if ($area_destino_id <= 0) {
     echo json_encode([]);
     exit;
 }
 
-// Consultar documentos del área con información de áreas y observación
+// Consulta con fecha de aceptación directa desde documentos
 $stmt = $conn->prepare("
-    SELECT 
-    d.id, 
-    d.nombre, 
-    d.numero_informe, 
-    d.archivo, 
-    d.estado, 
-    d.comentario,
-    d.fecha_subida, 
-    d.fecha_actualizacion,
+    SELECT
+        d.id,
+        d.nombre,
+        d.numero_informe,
+        d.archivo,
+        d.estado,
+        d.comentario,
+        d.fecha_subida,
+        d.fecha_actualizacion,
+        d.fecha_aceptacion,
+        ao.nombre_area AS origen,
+        ad.nombre_area AS destino
 
-    -- ✅ Fecha real de aceptación
-    (
-        SELECT s.fecha 
-        FROM seguimiento_documento s 
-        WHERE s.documento_id = d.id 
-        AND s.estado = 'recibido'
-        ORDER BY s.fecha ASC 
-        LIMIT 1
-    ) AS fecha_aceptacion,
-
-    ao.nombre_area as origen,
-    ad.nombre_area as destino
-
-FROM documentos d
-LEFT JOIN areas ao ON d.area_origen = ao.id
-LEFT JOIN areas ad ON d.area_destino = ad.id
-WHERE d.area_destino = ?
-ORDER BY d.fecha_subida DESC
+    FROM documentos d
+    LEFT JOIN areas ao ON d.area_origen_id = ao.id
+    LEFT JOIN areas ad ON d.area_destino_id = ad.id
+    WHERE d.area_destino_id = ?
+    ORDER BY d.fecha_subida DESC
 ");
 
-$stmt->bind_param("i", $area);
+$stmt->bind_param("i", $area_destino_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
 $documentos = [];
+
 while ($row = $result->fetch_assoc()) {
     $documentos[] = [
         'id' => $row['id'],
@@ -66,6 +57,7 @@ while ($row = $result->fetch_assoc()) {
 }
 
 echo json_encode($documentos);
+
 $stmt->close();
 $conn->close();
 ?>

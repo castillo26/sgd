@@ -88,7 +88,7 @@ function MisDocumentosAdmin() {
                 <th className="py-3 px-4 font-semibold text-gray-700">Destino</th>
                 <th className="py-3 px-4 font-semibold text-gray-700">Estado</th>
                 <th className="py-3 px-4 font-semibold text-gray-700">Observación</th>
-                <th className="py-3 px-4 font-semibold text-gray-700">Fecha Aceptación</th>
+                <th className="py-3 px-4 font-semibold text-gray-700">Fecha Actualización</th>
                 <th className="py-3 px-4 font-semibold text-gray-700">PDF</th>
                 <th className="py-3 px-4 font-semibold text-gray-700">Acciones</th>
               </tr>

@@ -32,10 +32,17 @@ method:"POST",
 body:formData
 })
 
-// Actualizar estado local sin recargar la página
-setDocs(prevDocs => prevDocs.map(doc =>
-  String(doc.id) === String(docSeleccionado) ? { ...doc, estado: "derivado" } : doc
-))
+// Recargar documentos
+const storedUser = JSON.parse(localStorage.getItem("user"))
+let url = "";
+if (storedUser.rol === "admin") {
+  url = `http://localhost/sgd-api/documentos_area.php?area=${storedUser.area}`;
+} else {
+  url = `http://localhost/sgd-api/mis_documentos.php?usuario_id=${storedUser.id}`;
+}
+const res = await fetch(url);
+const data = await res.json();
+setDocs(data);
 
 setDocSeleccionado(null)
 setNuevaArea("")
@@ -71,15 +78,25 @@ formData.append("comentario", comentario)
 formData.append("area_destino", nuevaArea)
 
 try {
-await fetch("http://localhost/sgd-api/actualizar_estado.php",{
+const response = await fetch("http://localhost/sgd-api/actualizar_estado.php",{
 method:"POST",
 body:formData
 })
 
-// Actualizar estado local sin recargar la página
-setDocs(prevDocs => prevDocs.map(doc =>
-  String(doc.id) === String(id) ? { ...doc, estado: nuevoEstado, comentario: comentario } : doc
-))
+const result = await response.json()
+
+// Recargar documentos desde el backend
+let url = "";
+if (user.rol === "admin") {
+  url = `http://localhost/sgd-api/documentos_area.php?area=${user.area}`;
+} else {
+  url = `http://localhost/sgd-api/mis_documentos.php?usuario_id=${user.id}`;
+}
+
+const updated = await fetch(url);
+const data = await updated.json();
+setDocs(data);
+
 } catch (error) {
 console.error("Error al actualizar estado:", error)
 }
@@ -167,7 +184,8 @@ Volver al Dashboard
 {user && user.rol !== "admin" && <th className="p-3">Destino</th>}
 <th className="p-3">Estado</th>
 <th className="p-3">Observación</th>
-<th className="p-3">Fecha</th>
+<th className="p-3">Fecha Subida</th>
+<th className="p-3">Fecha Actualización</th>
 <th className="p-3">Archivo</th>
 {user && user.rol === "admin" && <th className="p-3">Acciones</th>}
 
@@ -180,7 +198,7 @@ Volver al Dashboard
 {loading ? (
 
 <tr>
-<td colSpan={user && user.rol === "admin" ? "7" : "7"} className="p-6 text-center">
+<td colSpan={user && user.rol === "admin" ? "8" : "7"} className="p-6 text-center">
 Cargando documentos...
 </td>
 </tr>
@@ -188,7 +206,7 @@ Cargando documentos...
 ) : docs.length === 0 ? (
 
 <tr>
-<td colSpan={user && user.rol === "admin" ? "7" : "7"} className="p-6 text-center">
+<td colSpan={user && user.rol === "admin" ? "8" : "7"} className="p-6 text-center">
 {user && user.rol === "admin" ? "No hay documentos para tu área" : "No has enviado documentos aún"}
 </td>
 </tr>
@@ -241,6 +259,21 @@ docs.map(doc=>(
 
 <td className="p-3 text-center">
 {doc.fecha_subida}
+</td>
+
+<td className="py-4 px-4 text-gray-600 text-sm">
+  {(doc.fecha_aceptacion || doc.fecha_actualizacion) ? (
+    new Date(doc.fecha_aceptacion || doc.fecha_actualizacion)
+      .toLocaleString('es-PE', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+  ) : (
+    <span className="text-gray-400">-</span>
+  )}
 </td>
 
 <td className="p-3 text-center">

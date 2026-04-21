@@ -19,8 +19,8 @@ $stmt = $conn->prepare("
            ao.nombre_area as origen,
            ad.nombre_area as destino
     FROM documentos d
-    LEFT JOIN areas ao ON d.area_origen = ao.id
-    LEFT JOIN areas ad ON d.area_destino = ad.id
+    LEFT JOIN areas ao ON d.area_origen_id = ao.id
+    LEFT JOIN areas ad ON d.area_destino_id = ad.id
     WHERE d.usuario_id = ?
     ORDER BY d.fecha_subida DESC
 ");
