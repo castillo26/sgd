@@ -181,7 +181,7 @@ Volver al Dashboard
 
 <th className="p-3 text-left">Documento</th>
 <th className="p-3">N° Informe</th>
-{user && user.rol !== "admin" && <th className="p-3">Destino</th>}
+<th className="p-3">Origen</th>
 <th className="p-3">Estado</th>
 <th className="p-3">Observación</th>
 <th className="p-3">Fecha Subida</th>
@@ -225,11 +225,9 @@ docs.map(doc=>(
 {doc.numero_informe}
 </td>
 
-{user && user.rol !== "admin" && (
 <td className="p-3 text-center">
-{doc.destino}
+{doc.origen}
 </td>
-)}
 
 <td className="p-3 text-center">
 

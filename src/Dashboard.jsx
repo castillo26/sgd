@@ -243,7 +243,7 @@ console.error("Error al actualizar estado:", error)
 
                 <th className="py-3 px-4 font-semibold text-gray-700">Documento</th>
                 <th className="py-3 px-4 font-semibold text-gray-700">N° Informe</th>
-                {user.rol !== "admin" && <th className="py-3 px-4 font-semibold text-gray-700">Destino</th>}
+                <th className="py-3 px-4 font-semibold text-gray-700">Origen</th>
                 <th className="py-3 px-4 font-semibold text-gray-700">Estado</th>
                 <th className="py-3 px-4 font-semibold text-gray-700">Observación</th>
                 <th className="py-3 px-4 font-semibold text-gray-700">Fecha Actualización</th>
@@ -277,11 +277,9 @@ console.error("Error al actualizar estado:", error)
                       {doc.numero_informe || '-'}
                     </td>
 
-                    {user.rol !== "admin" && (
                     <td className="py-4 px-4 text-gray-600">
-                      {doc.destino}
+                      {doc.origen}
                     </td>
-                    )}
 
                     <td className="py-4 px-4">
                       <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
