@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ResponderDocumento from "./ResponderDocumento";
 
 function Dashboard() {
 
@@ -134,297 +135,206 @@ console.error("Error al actualizar estado:", error)
   }
 
   return (
+  <div className="min-h-screen bg-slate-50">
 
-    <div className="min-h-screen bg-gray-100">
-
-      {/* NAVBAR */}
-      <div className="bg-white shadow-md px-8 py-4 flex justify-between items-center">
-
-        <h1 className="text-xl font-bold text-blue-600">
-          SGD
-        </h1>
-
-        <button
-          onClick={logout}
-          className="text-red-500 hover:text-red-600 font-medium"
-        >
-          Cerrar sesión
-        </button>
-
-      </div>
-
-
-      {/* CONTENIDO */}
-      <div className="p-10">
-
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">
-          Bienvenido
-        </h2>
-
-        <p className="text-gray-500 mb-10">
-          {user.usuario}
-        </p>
-
-
-        {/* TARJETAS */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-
-          {user.rol === "admin" && (
-            <div
-              className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition cursor-pointer"
-              onClick={() => navigate("/mis-documentos")}
-            >
-              <h3 className="text-lg font-semibold mb-2">
-                Mis documentos enviados
-              </h3>
-              <p className="text-gray-500 text-sm">
-                Consulta el seguimiento de los trámites que has enviado.
-              </p>
-            </div>
-          )}
-
-          <div
-            className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition cursor-pointer"
-            onClick={() => navigate("/documentos")}
-          >
-            <h3 className="text-lg font-semibold mb-2">
-              {user.rol === "admin" ? "Documentos recibidos" : "Mis documentos"}
-            </h3>
-            <p className="text-gray-500 text-sm">
-              {user.rol === "admin"
-                ? "Revisa y gestiona los documentos de tu área."
-                : "Consulta el estado de tus trámites enviados."}
-            </p>
-          </div>
-          
-          <div
-  className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition cursor-pointer"
-  onClick={() => navigate("/archivados")}
->
-  <h3 className="text-lg font-semibold mb-2">
-    Documentos Archivados
-  </h3>
-  <p className="text-gray-500 text-sm">
-    Consulta todos los documentos finalizados de tu área.
-  </p>
-</div>
-
-          {(user.rol === "admin" || user.rol === "usuario") && (
-            <div
-              className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition cursor-pointer"
-              onClick={() => navigate("/subir")}
-            >
-              <h3 className="text-lg font-semibold mb-2">
-                {user.rol === "admin" ? "Subir documentos" : "Enviar trámite"}
-              </h3>
-              <p className="text-gray-500 text-sm">
-                {user.rol === "admin"
-                  ? "Envía documentos a otras áreas."
-                  : "Envía un documento para iniciar un trámite."}
-              </p>
-            </div>
-          )}
-
+    {/* HEADER */}
+    <header className="bg-white border-b border-slate-200 sticky top-0 z-50 backdrop-blur-sm">
+      <div className="max-w-7xl mx-auto px-8 py-4 flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-blue-700 tracking-tight">
+            Sistema de Gestión Documentaria
+          </h1>
+          <p className="text-sm text-slate-500">
+            Municipalidad Distrital
+          </p>
         </div>
 
+        <div className="flex items-center gap-6">
+          <div className="text-right">
+            <p className="font-semibold text-slate-800">{user.usuario}</p>
+            <p className="text-sm text-slate-500 capitalize">{user.rol}</p>
+          </div>
 
-        {/* TABLA DE DOCUMENTOS */}
-        <div className="bg-white p-6 rounded-xl shadow">
+          <button
+            onClick={logout}
+            className="bg-red-50 text-red-600 px-4 py-2 rounded-lg hover:bg-red-100 transition font-medium"
+          >
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+    </header>
 
-          <h3 className="text-xl font-bold mb-6">
+    <main className="max-w-7xl mx-auto px-8 py-10">
+
+      {/* BIENVENIDA */}
+      <section className="mb-10">
+        <h2 className="text-3xl font-bold text-slate-800">
+          Panel principal
+        </h2>
+        <p className="text-slate-500 mt-2">
+          Administra y da seguimiento a los documentos de tu área.
+        </p>
+      </section>
+
+      {/* TARJETAS */}
+      <section className="grid md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
+
+        {user.rol === "admin" && (
+          <div
+            onClick={() => navigate("/mis-documentos")}
+            className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer"
+          >
+            <h3 className="font-bold text-slate-800 mb-2">
+              Mis documentos enviados
+            </h3>
+            <p className="text-sm text-slate-500">
+              Seguimiento de documentos emitidos.
+            </p>
+          </div>
+        )}
+
+        <div
+          onClick={() => navigate("/documentos")}
+          className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer"
+        >
+          <h3 className="font-bold text-slate-800 mb-2">
             {user.rol === "admin" ? "Documentos recibidos" : "Mis documentos"}
           </h3>
+          <p className="text-sm text-slate-500">
+            Gestión documental activa.
+          </p>
+        </div>
 
-          <table className="w-full text-left border-collapse">
+        <div
+          onClick={() => navigate("/archivados")}
+          className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer"
+        >
+          <h3 className="font-bold text-slate-800 mb-2">
+            Archivados
+          </h3>
+          <p className="text-sm text-slate-500">
+            Historial de documentos finalizados.
+          </p>
+        </div>
 
-            <thead>
+        <div
+          onClick={() => navigate("/subir")}
+          className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer"
+        >
+          <h3 className="font-bold mb-2">
+            {user.rol === "admin" ? "Subir documento" : "Enviar trámite"}
+          </h3>
+          <p className="text-sm text-blue-100">
+            Registrar nuevo documento.
+          </p>
+        </div>
 
-              <tr className="bg-gray-100 border-b-2 border-gray-300">
+      </section>
 
-                <th className="py-3 px-4 font-semibold text-gray-700">Documento</th>
-                <th className="py-3 px-4 font-semibold text-gray-700">N° Informe</th>
-                <th className="py-3 px-4 font-semibold text-gray-700">Origen</th>
-                <th className="py-3 px-4 font-semibold text-gray-700">Estado</th>
-                <th className="py-3 px-4 font-semibold text-gray-700">Observación</th>
-                <th className="py-3 px-4 font-semibold text-gray-700">Fecha Actualización</th>
-                <th className="py-3 px-4 font-semibold text-gray-700">PDF</th>
-                {user.rol === "admin" && <th className="py-3 px-4 font-semibold text-gray-700">Acciones</th>}
+      {/* TABLA */}
+      <section className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
 
+        <div className="px-6 py-5 border-b border-slate-200 bg-slate-50">
+          <h3 className="text-xl font-bold text-slate-800">
+            {user.rol === "admin" ? "Documentos recibidos" : "Mis documentos"}
+          </h3>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+
+            <thead className="bg-slate-100 text-slate-700">
+              <tr>
+                <th className="px-5 py-4 text-left">Documento</th>
+                <th className="px-5 py-4 text-left">N° Informe</th>
+                <th className="px-5 py-4 text-left">Origen</th>
+                <th className="px-5 py-4 text-left">Estado</th>
+                <th className="px-5 py-4 text-left">Observación</th>
+                <th className="px-5 py-4 text-left">Actualización</th>
+                <th className="px-5 py-4 text-left">Archivo</th>
               </tr>
-
             </thead>
 
             <tbody>
-
               {docs.length === 0 ? (
                 <tr>
-                  <td colSpan={user.rol === "admin" ? "6" : "6"} className="py-8 text-center text-gray-400">
-                    {user.rol === "admin" ? "No hay documentos para tu área" : "No has enviado documentos aún"}
+                  <td colSpan="7" className="py-14 text-center text-slate-400">
+                    No hay documentos disponibles
                   </td>
                 </tr>
               ) : (
                 docs.map((doc, index) => (
                   <tr
                     key={doc.id}
-                    className={`border-b border-gray-200 hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                    className={`border-t hover:bg-slate-50 transition ${
+                      index % 2 === 0 ? "bg-white" : "bg-slate-50/40"
+                    }`}
                   >
-
-                    <td className="py-4 px-4 font-medium text-gray-800">
+                    <td className="px-5 py-4 font-medium text-slate-800">
                       {doc.nombre}
                     </td>
 
-                    <td className="py-4 px-4 text-gray-600">
-                      {doc.numero_informe || '-'}
+                    <td className="px-5 py-4 text-slate-600">
+                      {doc.numero_informe || "-"}
                     </td>
 
-                    <td className="py-4 px-4 text-gray-600">
+                    <td className="px-5 py-4 text-slate-600">
                       {doc.origen}
                     </td>
 
-                    <td className="py-4 px-4">
-                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                        doc.estado === "enviado" ? "bg-yellow-100 text-yellow-700 border border-yellow-300" :
-                        doc.estado === "recibido" ? "bg-blue-100 text-blue-700 border border-blue-300" :
-                        doc.estado === "en proceso" ? "bg-orange-100 text-orange-700 border border-orange-300" :
-                        doc.estado === "derivado" ? "bg-purple-100 text-purple-700 border border-purple-300" :
-                        doc.estado === "finalizado" ? "bg-green-100 text-green-700 border border-green-300" :
-                        doc.estado === "observado" ? "bg-red-100 text-red-700 border border-red-300" :
-                        "bg-gray-100 text-gray-700 border border-gray-300"
+                    <td className="px-5 py-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        doc.estado === "enviado"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : doc.estado === "recibido"
+                          ? "bg-blue-100 text-blue-700"
+                          : doc.estado === "en proceso"
+                          ? "bg-orange-100 text-orange-700"
+                          : doc.estado === "derivado"
+                          ? "bg-purple-100 text-purple-700"
+                          : doc.estado === "finalizado"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
                       }`}>
                         {doc.estado}
                       </span>
                     </td>
 
-                    <td className="py-4 px-4">
-                      {doc.comentario ? (
-                        <span className="text-red-600 text-xs" title={doc.comentario}>
-                          {doc.comentario.length > 30 ? doc.comentario.substring(0, 30) + "..." : doc.comentario}
-                        </span>
-                      ) : (
-                        <span className="text-gray-400 text-xs">-</span>
-                      )}
+                    <td className="px-5 py-4 text-slate-600 text-xs">
+                      {doc.comentario || "-"}
                     </td>
 
-                    <td className="py-4 px-4 text-gray-600 text-sm">
-  {(doc.fecha_aceptacion || doc.fecha_actualizacion) ? (
-    new Date(doc.fecha_aceptacion || doc.fecha_actualizacion)
-      .toLocaleString('es-PE', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-  ) : (
-    <span className="text-gray-400">-</span>
-  )}
-</td>
+                    <td className="px-5 py-4 text-slate-500">
+                      {(doc.fecha_aceptacion || doc.fecha_actualizacion)
+                        ? new Date(
+                            doc.fecha_aceptacion || doc.fecha_actualizacion
+                          ).toLocaleString("es-PE")
+                        : "-"}
+                    </td>
 
-                    <td className="py-4 px-4">
+                    <td className="px-5 py-4">
                       <a
                         href={`http://localhost/sgd-api/${doc.archivo}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                        className="text-blue-600 hover:text-blue-800 font-medium"
                       >
                         Ver PDF
                       </a>
                     </td>
-
-                    {user.rol === "admin" && (
-                      <td className="py-4 px-4">
-
-                        <div className="flex flex-wrap gap-2">
-                          {/* Aceptar y Observar: Solo cuando está en "enviado" */}
-                          {doc.estado === "enviado" && (
-                            <>
-                              <button
-                                onClick={()=>actualizarEstado(doc.id,"recibido")}
-                                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
-                              >
-                                Aceptar
-                              </button>
-                              <button
-                                onClick={()=>actualizarEstado(doc.id,"observado")}
-                                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
-                              >
-                                Observar
-                              </button>
-                            </>
-                          )}
-
-                          {/* Responder, Finalizar, Derivar: Cuando ya fue aceptado o está en proceso */}
-                          {(doc.estado === "recibido" || doc.estado === "en proceso") && (
-                            <>
-                              <button
-                                onClick={()=>actualizarEstado(doc.id,"en proceso")}
-                                className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
-                              >
-                                Responder
-                              </button>
-                              <button
-                                onClick={()=>actualizarEstado(doc.id,"finalizado")}
-                                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
-                              >
-                                Finalizar
-                              </button>
-                              <button
-                                onClick={()=>setDocSeleccionado(doc.id)}
-                                className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
-                              >
-                                Derivar
-                              </button>
-                            </>
-                          )}
-                        </div>
-
-                      </td>
-                    )}
-
                   </tr>
                 ))
               )}
-
             </tbody>
 
           </table>
-
-          {user.rol === "admin" && docSeleccionado && (
-            <div className="mt-6 bg-white p-6 rounded-lg shadow-md border border-gray-200">
-
-              <h3 className="text-lg font-bold text-gray-800 mb-4">
-                Derivar documento
-              </h3>
-
-              <div className="space-y-4">
-                <select
-                  onChange={(e)=>setNuevaArea(e.target.value)}
-                  className="border border-gray-300 p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                >
-                  <option value="">Seleccionar área</option>
-                  <option value="1">Administración</option>
-                  <option value="2">Contabilidad</option>
-                  <option value="3">Gerencia</option>
-                  <option value="4">RRHH</option>
-                </select>
-
-                <button
-                  onClick={()=>confirmarDerivacion()}
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
-                >
-                  Confirmar derivación
-                </button>
-              </div>
-
-            </div>
-          )}
-
         </div>
+      </section>
 
-      </div>
-
-    </div>
-  );
+    </main>
+  </div>
+);
 }
 
 export default Dashboard;

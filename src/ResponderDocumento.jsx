@@ -1,13 +1,13 @@
 import { useState } from "react";
 
-function SubsanarDocumento({ documento, onCancelar, onSubsanado }) {
+function ResponderDocumento({ documento, onCancelar, onRespondido }) {
   const [archivo, setArchivo] = useState(null);
   const [mensaje, setMensaje] = useState("");
   const [cargando, setCargando] = useState(false);
 
   const user = JSON.parse(localStorage.getItem("user"));
 
-  const handleSubsanar = async (e) => {
+  const handleResponder = async (e) => {
     e.preventDefault();
 
     if (!archivo) {
@@ -28,7 +28,7 @@ function SubsanarDocumento({ documento, onCancelar, onSubsanado }) {
     formData.append("archivo", archivo);
 
     try {
-      const res = await fetch("http://localhost/sgd-api/subsanar_documento.php", {
+      const res = await fetch("http://localhost/sgd-api/responder_documento.php", {
         method: "POST",
         body: formData,
       });
@@ -36,12 +36,12 @@ function SubsanarDocumento({ documento, onCancelar, onSubsanado }) {
       const data = await res.json();
 
       if (data.success) {
-        setMensaje("Documento subsanado correctamente");
+        setMensaje("Documento respondido correctamente");
         setTimeout(() => {
-          onSubsanado();
+          onRespondido();
         }, 1000);
       } else {
-        setMensaje(data.message || "Error al subsanar documento");
+        setMensaje(data.message || "Error al responder documento");
       }
     } catch (err) {
       setMensaje("Error del servidor");
@@ -52,29 +52,29 @@ function SubsanarDocumento({ documento, onCancelar, onSubsanado }) {
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-      <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden animate-fadeIn">
+      <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden">
 
         {/* HEADER */}
-        <div className="bg-gradient-to-r from-orange-500 to-amber-500 px-8 py-6 text-white">
-          <h2 className="text-2xl font-bold">Subsanar Documento</h2>
-          <p className="text-orange-100 text-sm mt-1">
-            Corrige y vuelve a enviar el documento observado
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6 text-white">
+          <h2 className="text-2xl font-bold">Responder Documento</h2>
+          <p className="text-blue-100 text-sm mt-1">
+            Adjunta la respuesta oficial al documento recibido
           </p>
         </div>
 
         <div className="p-8">
 
           {/* INFO */}
-          <div className="bg-orange-50 border border-orange-200 rounded-2xl p-5 mb-6 space-y-3">
+          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 mb-6 space-y-3">
             <div>
-              <p className="text-xs font-semibold text-orange-700 uppercase tracking-wide">
+              <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide">
                 Documento
               </p>
               <p className="text-gray-800 font-medium">{documento.nombre}</p>
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-orange-700 uppercase tracking-wide">
+              <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide">
                 N° Informe
               </p>
               <p className="text-gray-700">
@@ -83,30 +83,36 @@ function SubsanarDocumento({ documento, onCancelar, onSubsanado }) {
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-red-700 uppercase tracking-wide">
-                Observación
+              <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide">
+                Remitente
               </p>
-              <p className="text-red-600 text-sm font-medium">
-                {documento.comentario}
+              <p className="text-gray-700">{documento.origen}</p>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide">
+                Respuesta dirigida a
               </p>
+              <p className="text-gray-700">{documento.origen}</p>
             </div>
           </div>
 
-          <form onSubmit={handleSubsanar} className="space-y-6">
+          <form onSubmit={handleResponder} className="space-y-6">
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
-                Documento corregido (PDF)
+                Documento de respuesta (PDF)
               </label>
 
               <input
                 type="file"
                 accept="application/pdf"
                 onChange={(e) => setArchivo(e.target.files[0])}
+                required
                 className="block w-full text-sm border border-gray-200 rounded-xl p-3
                 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
-                file:text-sm file:font-medium file:bg-orange-100 file:text-orange-700
-                hover:file:bg-orange-200 cursor-pointer"
+                file:text-sm file:font-medium file:bg-blue-100 file:text-blue-700
+                hover:file:bg-blue-200 cursor-pointer"
               />
             </div>
 
@@ -126,9 +132,9 @@ function SubsanarDocumento({ documento, onCancelar, onSubsanado }) {
               <button
                 type="submit"
                 disabled={cargando}
-                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-xl font-semibold transition-all disabled:bg-gray-400"
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition-all disabled:bg-gray-400"
               >
-                {cargando ? "Subsanando..." : "Subsanar Documento"}
+                {cargando ? "Enviando..." : "Enviar Respuesta"}
               </button>
 
               <button
@@ -147,4 +153,4 @@ function SubsanarDocumento({ documento, onCancelar, onSubsanado }) {
   );
 }
 
-export default SubsanarDocumento;
+export default ResponderDocumento;
