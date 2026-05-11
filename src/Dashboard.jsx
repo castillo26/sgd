@@ -358,13 +358,14 @@ function Dashboard() {
                   <th className="px-5 py-4 text-left">Observación</th>
                   <th className="px-5 py-4 text-left">Actualización</th>
                   <th className="px-5 py-4 text-left">Archivo</th>
+                  {user.rol === "admin" && <th className="px-5 py-4 text-left">Acciones</th>}
                 </tr>
               </thead>
 
               <tbody>
                 {docs.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="py-14 text-center text-slate-400">
+                    <td colSpan={user.rol === "admin" ? "8" : "7"} className="py-14 text-center text-slate-400">
                       No hay documentos disponibles
                     </td>
                   </tr>
@@ -414,6 +415,35 @@ function Dashboard() {
                           Ver PDF
                         </button>
                       </td>
+
+                      {user.rol === "admin" && (
+                        <td className="px-5 py-4">
+                          <div className="flex gap-2 flex-wrap">
+                            {(doc.estado === "recibido" || doc.estado === "en proceso") && (
+                              <>
+                                <button
+                                  onClick={() => setDocumentoResponder(doc)}
+                                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                                >
+                                  Responder
+                                </button>
+                                <button
+                                  onClick={() => actualizarEstado(doc.id, "finalizado")}
+                                  className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                                >
+                                  Finalizar
+                                </button>
+                                <button
+                                  onClick={() => setDocSeleccionado(doc.id)}
+                                  className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                                >
+                                  Derivar
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   ))
                 )}
@@ -455,52 +485,26 @@ function Dashboard() {
               />
             </div>
 
-            {/* ACCIONES */}
-            {user.rol === "admin" && (
+            {/* ACCIONES - Solo para estado enviado */}
+            {user.rol === "admin" && docVisualizar.estado === "enviado" && (
               <div className="px-8 py-6 bg-white border-t border-slate-200">
                 <h3 className="text-lg font-semibold text-slate-800 mb-4">
                   Acciones sobre el documento
                 </h3>
-
-                {docVisualizar.estado === "enviado" && (
-                  <div className="flex gap-4">
-                    <button
-                      onClick={() => actualizarEstado(docVisualizar.id, "recibido")}
-                      className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold transition-all"
-                    >
-                      ✓ Aceptar Documento
-                    </button>
-                    <button
-                      onClick={() => actualizarEstado(docVisualizar.id, "observado")}
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-semibold transition-all"
-                    >
-                      ✗ Observar Documento
-                    </button>
-                  </div>
-                )}
-
-                {(docVisualizar.estado === "recibido" || docVisualizar.estado === "en proceso") && (
-                  <div className="flex gap-4">
-                    <button
-                      onClick={() => setDocumentoResponder(docVisualizar)}
-                      className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-xl font-semibold transition-all"
-                    >
-                      Responder
-                    </button>
-                    <button
-                      onClick={() => actualizarEstado(docVisualizar.id, "finalizado")}
-                      className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold transition-all"
-                    >
-                      Finalizar
-                    </button>
-                    <button
-                      onClick={() => setDocSeleccionado(docVisualizar.id)}
-                      className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl font-semibold transition-all"
-                    >
-                      Derivar
-                    </button>
-                  </div>
-                )}
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => actualizarEstado(docVisualizar.id, "recibido")}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold transition-all"
+                  >
+                    ✓ Aceptar Documento
+                  </button>
+                  <button
+                    onClick={() => actualizarEstado(docVisualizar.id, "observado")}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-semibold transition-all"
+                  >
+                    ✗ Observar Documento
+                  </button>
+                </div>
               </div>
             )}
 
