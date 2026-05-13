@@ -14,13 +14,13 @@ function SubirDocumento() {
 
   useEffect(() => {
     const cargarTipos = async () => {
-      const res = await fetch("http://localhost/sgd-api/obtener_tipos.php");
+      const res = await fetch("http://localhost:8080/sgd-api/obtener_tipos.php");
       const data = await res.json();
       if (data.success) setTiposDocumento(data.data);
     };
 
     const cargarAreas = async () => {
-      const res = await fetch("http://localhost/sgd-api/obtener_areas.php");
+      const res = await fetch("http://localhost:8080/sgd-api/obtener_areas.php");
       const data = await res.json();
       if (data.success) setAreas(data.data);
     };
@@ -54,7 +54,7 @@ function SubirDocumento() {
     formData.append("area_destino", parseInt(areaDestino));
 
     try {
-      const res = await fetch("http://localhost/sgd-api/subir_documento.php", {
+      const res = await fetch("http://localhost:8080/sgd-api/subir_documento.php", {
         method: "POST",
         body: formData
       });

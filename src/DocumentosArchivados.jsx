@@ -15,7 +15,7 @@ function DocumentosArchivados() {
       return;
     }
 
-    fetch(`http://localhost/sgd-api/documentos_archivados.php?area=${storedUser.area}`)
+    fetch(`http://localhost:8080/sgd-api/documentos_archivados.php?area=${storedUser.area}`)
       .then(res => res.json())
       .then(data => {
         setDocs(data);
@@ -88,7 +88,7 @@ function DocumentosArchivados() {
                   <td className="p-4 text-center">{doc.fecha_subida}</td>
                   <td className="p-4 text-center">
                     <a
-                      href={`http://localhost/sgd-api/${doc.archivo}`}
+                      href={`http://localhost:8080/sgd-api/${doc.archivo}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:underline"

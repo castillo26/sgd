@@ -10,9 +10,21 @@
   <!-- React render target -->
   <div id="root"></div>
 
+  <!-- Contenedor para Firma Perú -->
+  <div id="firmaperu" style="display:none"></div>
+
+  <!-- Elemento requerido por el script de Firma Perú para adjuntar el iframe -->
+  <div id="addComponent" style="display:none"></div>
+
+  <!-- jQuery 3.6.0 para Firma Perú -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    onload="window.jqFirmaPeru=jQuery.noConflict(false)"></script>
+
+  <!-- Firma Perú Cliente Web -->
+  <script src="https://apps.firmaperu.gob.pe/web/clienteweb/firmaperu.min.js"
+    defer></script>
+
   <!-- Vite entrypoint -->
   <script type="module" src="/src/main.jsx"></script>
-
-    <!-- Prueba --><!-- Prueba --><!-- Prueba --><!-- Prueba --><!-- Prueba -->
 </body>
 </html>

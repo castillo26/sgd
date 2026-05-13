@@ -28,7 +28,7 @@ function ResponderDocumento({ documento, onCancelar, onRespondido }) {
     formData.append("archivo", archivo);
 
     try {
-      const res = await fetch("http://localhost/sgd-api/responder_documento.php", {
+      const res = await fetch("http://localhost:8080/sgd-api/responder_documento.php", {
         method: "POST",
         body: formData,
       });

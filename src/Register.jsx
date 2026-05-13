@@ -13,7 +13,7 @@ export function Register() {
   useEffect(() => {
     const cargarAreas = async () => {
       try {
-        const res = await fetch("http://localhost/sgd-api/obtener_areas.php");
+        const res = await fetch("http://localhost:8080/sgd-api/obtener_areas.php");
         const data = await res.json();
 
         if (data.success) {
@@ -48,7 +48,7 @@ export function Register() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost/sgd-api/register.php", {
+      const response = await fetch("http://localhost:8080/sgd-api/register.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

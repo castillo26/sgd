@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ResponderDocumento from "./ResponderDocumento";
+import FirmaDigital from "./FirmaDigital";
 
 function Dashboard() {
   const [user, setUser] = useState(null);
@@ -10,6 +11,7 @@ function Dashboard() {
   const [docSeleccionado, setDocSeleccionado] = useState(null);
   const [docVisualizar, setDocVisualizar] = useState(null);
   const [documentoResponder, setDocumentoResponder] = useState(null);
+  const [documentoFirmar, setDocumentoFirmar] = useState(null);
   const [loading, setLoading] = useState(true);
   const [areas, setAreas] = useState([]);
 
@@ -23,9 +25,9 @@ function Dashboard() {
     let url = "";
 
     if (userData.rol === "admin") {
-      url = `http://localhost/sgd-api/documentos_area.php?area=${userData.area}`;
+      url = `http://localhost:8080/sgd-api/documentos_area.php?area=${userData.area}`;
     } else {
-      url = `http://localhost/sgd-api/mis_documentos.php?usuario_id=${userData.id}`;
+      url = `http://localhost:8080/sgd-api/mis_documentos.php?usuario_id=${userData.id}`;
     }
 
     try {
@@ -47,7 +49,7 @@ function Dashboard() {
 
   const cargarAreas = async () => {
     try {
-      const response = await fetch("http://localhost/sgd-api/areas.php");
+      const response = await fetch("http://localhost:8080/sgd-api/areas.php");
       const data = await response.json();
       setAreas(data);
     } catch (error) {
@@ -70,7 +72,7 @@ function Dashboard() {
     formData.append("area_destino", nuevaArea);
 
     try {
-      await fetch("http://localhost/sgd-api/actualizar_estado.php", {
+      await fetch("http://localhost:8080/sgd-api/actualizar_estado.php", {
         method: "POST",
         body: formData,
       });
@@ -105,7 +107,7 @@ function Dashboard() {
     formData.append("usuario_id", user.id);
 
     try {
-      const response = await fetch("http://localhost/sgd-api/actualizar_estado.php", {
+      const response = await fetch("http://localhost:8080/sgd-api/actualizar_estado.php", {
         method: "POST",
         body: formData,
       });
@@ -479,7 +481,7 @@ function Dashboard() {
             {/* CONTENIDO */}
             <div className="flex-1 overflow-auto p-6 bg-slate-100">
               <iframe
-                src={`http://localhost/sgd-api/${docVisualizar.archivo}`}
+                src={`http://localhost:8080/sgd-api/${docVisualizar.archivo}`}
                 className="w-full h-full rounded-xl border-0"
                 title="PDF Viewer"
               />
@@ -503,6 +505,12 @@ function Dashboard() {
                     className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-semibold transition-all"
                   >
                     ✗ Observar Documento
+                  </button>
+                  <button
+                    onClick={() => setDocumentoFirmar(docVisualizar)}
+                    className="flex-1 bg-blue-700 hover:bg-blue-800 text-white py-3 rounded-xl font-semibold transition-all"
+                  >
+                    ✎ Firmar Digitalmente
                   </button>
                 </div>
               </div>
@@ -560,6 +568,19 @@ function Dashboard() {
 
           </div>
         </div>
+      )}
+
+      {/* FIRMA DIGITAL */}
+      {documentoFirmar && (
+        <FirmaDigital
+          documento={documentoFirmar}
+          onCancelar={() => setDocumentoFirmar(null)}
+          onFirmaExitosa={() => {
+            setDocumentoFirmar(null);
+            setDocVisualizar(null);
+            cargarDocumentos();
+          }}
+        />
       )}
 
       {/* RESPONDER DOCUMENTO */}

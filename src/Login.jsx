@@ -8,7 +8,7 @@ export function Login() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost/sgd-api/areas.php")
+    fetch("http://localhost:8080/sgd-api/areas.php")
       .then((res) => res.json())
       .then((data) => setAreas(data))
       .catch((err) => {
@@ -33,7 +33,7 @@ export function Login() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost/sgd-api/login.php", {
+      const response = await fetch("http://localhost:8080/sgd-api/login.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

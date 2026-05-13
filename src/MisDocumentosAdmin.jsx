@@ -23,7 +23,7 @@ function MisDocumentosAdmin() {
 
     setUser(parsedUser);
 
-    fetch(`http://localhost/sgd-api/documentos_admin.php?usuario_id=${parsedUser.id}`)
+    fetch(`http://localhost:8080/sgd-api/documentos_admin.php?usuario_id=${parsedUser.id}`)
       .then(res => res.json())
       .then(data => setDocs(data))
       .catch(err => console.error(err));
@@ -31,7 +31,7 @@ function MisDocumentosAdmin() {
 
   const cargarDocumentos = () => {
     if (user) {
-      fetch(`http://localhost/sgd-api/documentos_admin.php?usuario_id=${user.id}`)
+      fetch(`http://localhost:8080/sgd-api/documentos_admin.php?usuario_id=${user.id}`)
         .then(res => res.json())
         .then(data => setDocs(data))
         .catch(err => console.error(err));
@@ -222,7 +222,7 @@ function MisDocumentosAdmin() {
 
                       <td className="p-4 text-center">
                         <a
-                          href={`http://localhost/sgd-api/${doc.archivo}`}
+                          href={`http://localhost:8080/sgd-api/${doc.archivo}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-600 hover:underline font-medium"

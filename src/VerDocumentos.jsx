@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ResponderDocumento from "./ResponderDocumento";
+import FirmaDigital from "./FirmaDigital";
 
 function VerDocumentos() {
   const [areas, setAreas] = useState([]);
   const [nuevaArea, setNuevaArea] = useState("");
   const [docSeleccionado, setDocSeleccionado] = useState(null);
   const [documentoResponder, setDocumentoResponder] = useState(null);
+  const [documentoFirmar, setDocumentoFirmar] = useState(null);
+  const [docVisualizar, setDocVisualizar] = useState(null);
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
@@ -17,7 +20,7 @@ function VerDocumentos() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost/sgd-api/areas.php")
+    fetch("http://localhost:8080/sgd-api/areas.php")
       .then((res) => res.json())
       .then((data) => setAreas(data));
   }, []);
@@ -35,9 +38,9 @@ function VerDocumentos() {
     let url = "";
 
     if (storedUser.rol === "admin") {
-      url = `http://localhost/sgd-api/documentos_area.php?area=${storedUser.area}&usuario_id=${storedUser.id}`;
+      url = `http://localhost:8080/sgd-api/documentos_area.php?area=${storedUser.area}&usuario_id=${storedUser.id}`;
     } else {
-      url = `http://localhost/sgd-api/mis_documentos.php?usuario_id=${storedUser.id}`;
+      url = `http://localhost:8080/sgd-api/mis_documentos.php?usuario_id=${storedUser.id}`;
     }
 
     fetch(url)
@@ -54,9 +57,9 @@ function VerDocumentos() {
     let url = "";
 
     if (user.rol === "admin") {
-      url = `http://localhost/sgd-api/documentos_area.php?area=${user.area}&usuario_id=${user.id}`;
+      url = `http://localhost:8080/sgd-api/documentos_area.php?area=${user.area}&usuario_id=${user.id}`;
     } else {
-      url = `http://localhost/sgd-api/mis_documentos.php?usuario_id=${user.id}`;
+      url = `http://localhost:8080/sgd-api/mis_documentos.php?usuario_id=${user.id}`;
     }
 
     fetch(url)
@@ -78,7 +81,7 @@ function VerDocumentos() {
     formData.append("comentario", comentario);
     formData.append("area_destino", nuevaArea);
 
-    await fetch("http://localhost/sgd-api/actualizar_estado.php", {
+    await fetch("http://localhost:8080/sgd-api/actualizar_estado.php", {
       method: "POST",
       body: formData,
     });
@@ -108,7 +111,7 @@ function VerDocumentos() {
     formData.append("comentario", comentario);
     formData.append("area_destino", user.area);
 
-    await fetch("http://localhost/sgd-api/actualizar_estado.php", {
+    await fetch("http://localhost:8080/sgd-api/actualizar_estado.php", {
       method: "POST",
       body: formData,
     });
@@ -308,14 +311,12 @@ function VerDocumentos() {
                       </td>
 
                       <td className="p-4 text-center">
-                        <a
-                          href={`http://localhost/sgd-api/${doc.archivo}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          onClick={() => setDocVisualizar(doc)}
                           className="text-blue-600 hover:underline font-medium"
                         >
                           Ver PDF
-                        </a>
+                        </button>
                       </td>
 
                       {user.rol === "admin" && (
@@ -412,6 +413,69 @@ function VerDocumentos() {
               Confirmar derivación
             </button>
           </div>
+        )}
+
+        {/* MODAL VISUALIZAR PDF */}
+        {docVisualizar && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+            <div className="w-full max-w-[98vw] bg-white rounded-3xl shadow-2xl overflow-hidden h-[98vh] flex flex-col">
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6 text-white flex justify-between items-center">
+                <div>
+                  <h2 className="text-2xl font-bold">{docVisualizar.nombre}</h2>
+                  <p className="text-blue-100 text-sm mt-1">
+                    N° Informe: {docVisualizar.numero_informe || "-"} | Origen: {docVisualizar.origen}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setDocVisualizar(null)}
+                  className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition"
+                >
+                  ✕ Cerrar
+                </button>
+              </div>
+              <div className="flex-1 overflow-auto p-6 bg-slate-100">
+                <iframe
+                  src={`http://localhost:8080/sgd-api/${docVisualizar.archivo}`}
+                  className="w-full h-full rounded-xl border-0"
+                  title="PDF Viewer"
+                />
+              </div>
+              {user.rol === "admin" && docVisualizar.estado === "enviado" && (
+                <div className="px-8 py-6 bg-white border-t border-slate-200">
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => setDocumentoFirmar(docVisualizar)}
+                      className="flex-1 bg-blue-700 hover:bg-blue-800 text-white py-3 rounded-xl font-semibold transition-all"
+                    >
+                      ✎ Firmar Digitalmente
+                    </button>
+                    <button
+                      onClick={() => {
+                        actualizarEstado(docVisualizar.id, "recibido");
+                        setDocVisualizar(null);
+                      }}
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold transition-all"
+                    >
+                      ✓ Aceptar Documento
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* FIRMA DIGITAL */}
+        {documentoFirmar && (
+          <FirmaDigital
+            documento={documentoFirmar}
+            onCancelar={() => setDocumentoFirmar(null)}
+            onFirmaExitosa={() => {
+              setDocumentoFirmar(null);
+              setDocVisualizar(null);
+              cargarDocumentos();
+            }}
+          />
         )}
 
         {/* RESPONDER */}

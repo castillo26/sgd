@@ -28,7 +28,7 @@ function SubsanarDocumento({ documento, onCancelar, onSubsanado }) {
     formData.append("archivo", archivo);
 
     try {
-      const res = await fetch("http://localhost/sgd-api/subsanar_documento.php", {
+      const res = await fetch("http://localhost:8080/sgd-api/subsanar_documento.php", {
         method: "POST",
         body: formData,
       });
