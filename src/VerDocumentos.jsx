@@ -10,6 +10,7 @@ function VerDocumentos() {
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [pdfAdjunto, setPdfAdjunto] = useState(null);
 
   const [busqueda, setBusqueda] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("todos");
@@ -78,6 +79,11 @@ function VerDocumentos() {
     formData.append("comentario", comentario);
     formData.append("area_destino", nuevaArea);
 
+    // Si hay PDF adjunto, agregarlo
+    if (pdfAdjunto) {
+      formData.append("pdf_adjunto", pdfAdjunto);
+    }
+
     await fetch("http://localhost/sgd-api/actualizar_estado.php", {
       method: "POST",
       body: formData,
@@ -86,6 +92,7 @@ function VerDocumentos() {
     cargarDocumentos();
     setDocSeleccionado(null);
     setNuevaArea("");
+    setPdfAdjunto(null);
   };
 
   const actualizarEstado = async (id, nuevoEstado) => {

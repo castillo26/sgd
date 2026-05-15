@@ -12,6 +12,7 @@ function Dashboard() {
   const [documentoResponder, setDocumentoResponder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [areas, setAreas] = useState([]);
+  const [pdfAdjunto, setPdfAdjunto] = useState(null);
 
   const navigate = useNavigate();
 
@@ -65,9 +66,14 @@ function Dashboard() {
 
     const formData = new FormData();
     formData.append("id", docSeleccionado);
-    formData.append("estado", "derivado");
+    formData.append("estado", "enviado");
     formData.append("comentario", comentario);
     formData.append("area_destino", nuevaArea);
+
+    // Si hay PDF adjunto, agregarlo
+    if (pdfAdjunto) {
+      formData.append("pdf_adjunto", pdfAdjunto);
+    }
 
     try {
       await fetch("http://localhost/sgd-api/actualizar_estado.php", {
@@ -78,6 +84,7 @@ function Dashboard() {
       cargarDocumentos();
       setDocSeleccionado(null);
       setNuevaArea("");
+      setPdfAdjunto(null);
     } catch (error) {
       console.error("Error al derivar:", error);
     }
@@ -419,7 +426,7 @@ function Dashboard() {
                       {user.rol === "admin" && (
                         <td className="px-5 py-4">
                           <div className="flex gap-2 flex-wrap">
-                            {(doc.estado === "recibido" || doc.estado === "en proceso") && (
+                            {(doc.estado === "recibido" || doc.estado === "en proceso" || doc.estado === "derivado") && (
                               <>
                                 <button
                                   onClick={() => setDocumentoResponder(doc)}
@@ -539,6 +546,24 @@ function Dashboard() {
                 ))}
               </select>
 
+              <div className="mb-6">
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Adjuntar PDF adicional (opcional)
+                </label>
+                <p className="text-xs text-gray-500 mb-2">
+                  Si adjunta un PDF, se unirá con el documento original. El PDF adjunto aparecerá primero.
+                </p>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={(e) => setPdfAdjunto(e.target.files[0])}
+                  className="block w-full text-sm border border-gray-200 rounded-xl p-3
+                  file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
+                  file:text-sm file:font-medium file:bg-purple-100 file:text-purple-700
+                  hover:file:bg-purple-200 cursor-pointer"
+                />
+              </div>
+
               <div className="flex gap-4">
                 <button
                   onClick={confirmarDerivacion}
@@ -550,6 +575,7 @@ function Dashboard() {
                   onClick={() => {
                     setDocSeleccionado(null);
                     setNuevaArea("");
+                    setPdfAdjunto(null);
                   }}
                   className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-semibold transition-all"
                 >
