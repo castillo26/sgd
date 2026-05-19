@@ -63,7 +63,7 @@ function SubirDocumento() {
 
       if (data.success) {
         setMensaje("Documento enviado correctamente");
-        setTimeout(() => navigate("/documentos"), 1200);
+        setTimeout(() => navigate("/dashboard"), 1200);
       }
     } catch {
       setMensaje("Error del servidor");

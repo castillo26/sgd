@@ -1,9 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function ResponderDocumento({ documento, onCancelar, onRespondido }) {
   const [archivo, setArchivo] = useState(null);
   const [mensaje, setMensaje] = useState("");
   const [cargando, setCargando] = useState(false);
+  const [tiposDocumento, setTiposDocumento] = useState([]);
+  const [nombre, setNombre] = useState("");
+  const [numeroInforme, setNumeroInforme] = useState("");
+
+  useEffect(() => {
+    const cargarTipos = async () => {
+      const res = await fetch("http://localhost/sgd-api/obtener_tipos.php");
+      const data = await res.json();
+      if (data.success) setTiposDocumento(data.data);
+    };
+    cargarTipos();
+  }, []);
 
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -26,6 +38,8 @@ function ResponderDocumento({ documento, onCancelar, onRespondido }) {
     formData.append("id", documento.id);
     formData.append("usuario_id", user.id);
     formData.append("archivo", archivo);
+    formData.append("nombre", nombre);
+    formData.append("numero_informe", numeroInforme);
 
     try {
       const res = await fetch("http://localhost/sgd-api/responder_documento.php", {
@@ -98,6 +112,31 @@ function ResponderDocumento({ documento, onCancelar, onRespondido }) {
           </div>
 
           <form onSubmit={handleResponder} className="space-y-6">
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <select
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                className="p-4 border rounded-xl"
+                required
+              >
+                <option value="">Tipo documento</option>
+                {tiposDocumento.map(tipo => (
+                  <option key={tipo.doc_codID} value={tipo.tipo}>
+                    {tipo.tipo}
+                  </option>
+                ))}
+              </select>
+
+              <input
+                type="text"
+                placeholder="N° Informe"
+                value={numeroInforme}
+                onChange={(e) => setNumeroInforme(e.target.value)}
+                className="p-4 border rounded-xl"
+                required
+              />
+            </div>
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">

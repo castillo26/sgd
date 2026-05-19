@@ -8,6 +8,8 @@ include 'conexion.php';
 // Recibir datos del frontend
 $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
 $usuario_id = isset($_POST['usuario_id']) ? intval($_POST['usuario_id']) : 0;
+$nombre = isset($_POST['nombre']) ? $_POST['nombre'] : '';
+$numero_informe = isset($_POST['numero_informe']) ? $_POST['numero_informe'] : '';
 
 // Validar datos obligatorios
 if ($id <= 0) {
@@ -81,6 +83,8 @@ try {
     $stmt = $conn->prepare("
         UPDATE documentos
         SET
+            nombre = ?,
+            numero_informe = ?,
             estado = 'finalizado',
             archivo = ?,
             comentario = NULL,
@@ -88,7 +92,7 @@ try {
         WHERE id = ?
     ");
 
-    $stmt->bind_param("si", $rutaArchivo, $id);
+    $stmt->bind_param("sssi", $nombre, $numero_informe, $rutaArchivo, $id);
 
     if ($stmt->execute()) {
         // Registrar en el historial
