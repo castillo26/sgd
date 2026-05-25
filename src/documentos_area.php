@@ -1,63 +1,68 @@
 <?php
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
 
-include 'conexion.php';
+header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json");
 
-// Recibir el área del admin
-$area_destino_id = isset($_GET['area']) ? intval($_GET['area']) : 0;
+require "conexion.php";
 
-if ($area_destino_id <= 0) {
+$area = isset($_GET['area']) ? intval($_GET['area']) : 0;
+
+if ($area <= 0) {
     echo json_encode([]);
     exit;
 }
 
-// Consulta con fecha de aceptación directa desde documentos
-$stmt = $conn->prepare("
-    SELECT
-        d.id,
-        d.nombre,
-        d.numero_informe,
-        d.archivo,
-        d.estado,
-        d.comentario,
-        d.fecha_subida,
-        d.fecha_actualizacion,
-        d.fecha_aceptacion,
-        ao.nombre_area AS origen,
-        ad.nombre_area AS destino
+/*
+    Mostrar:
 
-    FROM documentos d
-    LEFT JOIN areas ao ON d.area_origen_id = ao.id
-    LEFT JOIN areas ad ON d.area_destino_id = ad.id
-    WHERE d.area_destino_id = ?
-    ORDER BY d.fecha_subida DESC
-");
+    1. Documentos recibidos por el área
+    2. Documentos pendientes de evaluación
+       donde el área actual es el origen
+*/
 
-$stmt->bind_param("i", $area_destino_id);
+$sql = "
+SELECT 
+    d.*,
+    a1.nombre_area AS origen,
+    a2.nombre_area AS destino
+
+FROM documentos d
+
+JOIN areas a1 ON d.area_origen_id = a1.id
+JOIN areas a2 ON d.area_destino_id = a2.id
+
+WHERE
+(
+    d.area_destino_id = ?
+    AND d.estado != 'finalizado'
+)
+
+OR
+(
+    d.area_origen_id = ?
+    AND d.estado = 'pendiente_evaluacion'
+)
+
+ORDER BY d.fecha_actualizacion DESC
+";
+
+$stmt = $conn->prepare($sql);
+
+$stmt->bind_param("ii", $area, $area);
+
 $stmt->execute();
+
 $result = $stmt->get_result();
 
-$documentos = [];
+$docs = [];
 
 while ($row = $result->fetch_assoc()) {
-    $documentos[] = [
-        'id' => $row['id'],
-        'nombre' => $row['nombre'],
-        'numero_informe' => $row['numero_informe'],
-        'archivo' => $row['archivo'],
-        'estado' => $row['estado'],
-        'comentario' => $row['comentario'],
-        'origen' => $row['origen'],
-        'destino' => $row['destino'],
-        'fecha_subida' => $row['fecha_subida'],
-        'fecha_actualizacion' => $row['fecha_actualizacion'],
-        'fecha_aceptacion' => $row['fecha_aceptacion']
-    ];
+    $docs[] = $row;
 }
 
-echo json_encode($documentos);
+echo json_encode($docs);
 
 $stmt->close();
 $conn->close();
+
 ?>

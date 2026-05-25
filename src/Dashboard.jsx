@@ -141,6 +141,7 @@ function Dashboard() {
       derivado: "bg-purple-100 text-purple-700 border-purple-300",
       finalizado: "bg-green-100 text-green-700 border-green-300",
       observado: "bg-red-100 text-red-700 border-red-300",
+      "pendiente_evaluacion": "bg-cyan-100 text-cyan-700 border-cyan-300",
     };
 
     return styles[estado] || "bg-gray-100 text-gray-700 border-gray-300";
@@ -427,27 +428,48 @@ function Dashboard() {
                         <td className="px-5 py-4">
                           <div className="flex gap-2 flex-wrap">
                             {(doc.estado === "recibido" || doc.estado === "en proceso" || doc.estado === "derivado") && (
-                              <>
-                                <button
-                                  onClick={() => setDocumentoResponder(doc)}
-                                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                                >
-                                  Responder
-                                </button>
-                                <button
-                                  onClick={() => actualizarEstado(doc.id, "finalizado")}
-                                  className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                                >
-                                  Finalizar
-                                </button>
-                                <button
-                                  onClick={() => setDocSeleccionado(doc.id)}
-                                  className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                                >
-                                  Derivar
-                                </button>
-                              </>
-                            )}
+                            <>
+                              <button
+                                onClick={() => setDocumentoResponder(doc)}
+                                className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                              >
+                                Responder
+                              </button>
+
+                              <button
+                                onClick={() => actualizarEstado(doc.id, "finalizado")}
+                                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                              >
+                                Finalizar
+                              </button>
+
+                              <button
+                                onClick={() => setDocSeleccionado(doc.id)}
+                                className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                              >
+                                Derivar
+                              </button>
+                            </>
+                          )}
+
+                          {doc.estado === "pendiente_evaluacion" &&
+ doc.area_destino_id == user.area && (
+                            <>
+                              <button
+                                onClick={() => actualizarEstado(doc.id, "finalizado")}
+                                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                              >
+                                ✓ Aceptar Respuesta
+                              </button>
+
+                              <button
+                                onClick={() => actualizarEstado(doc.id, "observado")}
+                                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                              >
+                                ✗ Observar Respuesta
+                              </button>
+                            </>
+                          )}
                           </div>
                         </td>
                       )}
@@ -493,23 +515,41 @@ function Dashboard() {
             </div>
 
             {/* ACCIONES - Solo para estado enviado */}
-            {user.rol === "admin" && docVisualizar.estado === "enviado" && (
+            {user.rol === "admin" &&
+ (
+   docVisualizar.estado === "enviado" ||
+   (
+     docVisualizar.estado === "pendiente_evaluacion" &&
+     docVisualizar.area_destino_id == user.area
+   )
+ ) && (
               <div className="px-8 py-6 bg-white border-t border-slate-200">
                 <h3 className="text-lg font-semibold text-slate-800 mb-4">
-                  Acciones sobre el documento
-                </h3>
+  {docVisualizar.estado === "pendiente_evaluacion"
+    ? "Evaluar respuesta del área"
+    : "Acciones sobre el documento"}
+</h3>
                 <div className="flex gap-4">
                   <button
-                    onClick={() => actualizarEstado(docVisualizar.id, "recibido")}
+  onClick={() =>
+    actualizarEstado(
+      docVisualizar.id,
+      docVisualizar.estado === "pendiente_evaluacion"
+        ? "finalizado"
+        : "recibido")}
                     className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold transition-all"
                   >
-                    ✓ Aceptar Documento
+                    {docVisualizar.estado === "pendiente_evaluacion"
+  ? "✓ Aceptar Respuesta"
+  : "✓ Aceptar Documento"}
                   </button>
                   <button
                     onClick={() => actualizarEstado(docVisualizar.id, "observado")}
                     className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-semibold transition-all"
                   >
-                    ✗ Observar Documento
+                    {docVisualizar.estado === "pendiente_evaluacion"
+  ? "✗ Observar Respuesta"
+  : "✗ Observar Documento"}
                   </button>
                 </div>
               </div>

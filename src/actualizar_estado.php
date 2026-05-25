@@ -3,6 +3,10 @@ header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
 
+require_once __DIR__ . '/vendor/autoload.php';
+
+use setasign\Fpdi\Fpdi;
+
 include 'conexion.php';
 
 // Recibir datos del frontend
