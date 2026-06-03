@@ -93,29 +93,31 @@ try {
             $gsPath =
                 '"C:\\Program Files (x86)\\gs\\gs10.07.1\\bin\\gswin32c.exe"';
 
-            // PDF adjunto compatible
+            // ==========================================
+// CONVERTIR ADJUNTO A PDF COMPATIBLE
+// ==========================================
 
-            $adjuntoCompatible =
-                'uploads/temp/' .
-                uniqid() .
-                '_adjunto_compatible.pdf';
+$adjuntoCompatible =
+    'uploads/temp/' .
+    uniqid() .
+    '_adjunto_compatible.pdf';
 
-            $cmd =
-                $gsPath .
-                ' -sDEVICE=pdfwrite' .
-                ' -dCompatibilityLevel=1.4' .
-                ' -dNOPAUSE' .
-                ' -dQUIET' .
-                ' -dBATCH' .
-                ' -sOutputFile="' .
-                $adjuntoCompatible .
-                '" "' .
-                $tempAdjunto .
-                '"';
+$cmd =
+    $gsPath .
+    ' -sDEVICE=pdfwrite' .
+    ' -dCompatibilityLevel=1.4' .
+    ' -dNOPAUSE' .
+    ' -dQUIET' .
+    ' -dBATCH' .
+    ' -sOutputFile="' .
+    $adjuntoCompatible .
+    '" "' .
+    $tempAdjunto .
+    '"';
 
-            exec($cmd, $out, $ret);
+exec($cmd, $out, $ret);
 
-            if (
+if (
     $ret === 0 &&
     file_exists($adjuntoCompatible) &&
     filesize($adjuntoCompatible) > 0
@@ -127,7 +129,9 @@ try {
 
 } else {
 
-    $tempAdjunto = $tempAdjunto;
+    throw new Exception(
+        'Ghostscript no pudo convertir el PDF adjunto'
+    );
 }
 
             // PDF original compatible
@@ -154,13 +158,33 @@ try {
 
             exec($cmd, $out, $ret);
 
-            if (
+if (
     $ret === 0 &&
     file_exists($originalCompatible) &&
     filesize($originalCompatible) > 0
 ) {
 
     $rutaOriginal = $originalCompatible;
+
+} else {
+
+    throw new Exception(
+        'Ghostscript no pudo convertir el PDF original'
+    );
+}
+
+            if (!file_exists($tempAdjunto)) {
+    throw new Exception(
+        'No existe adjunto convertido: ' .
+        $tempAdjunto
+    );
+}
+
+if (!file_exists($rutaOriginal)) {
+    throw new Exception(
+        'No existe original convertido: ' .
+        $rutaOriginal
+    );
 }
 
             // ==================================
@@ -372,7 +396,12 @@ if (filesize($rutaOriginal) <= 0) {
 
     echo json_encode([
         'success' => false,
-        'message' => 'Error: ' . $e->getMessage()
+        'message' => $e->getMessage(),
+        'tempAdjunto' => $tempAdjunto ?? null,
+        'rutaOriginal' => $rutaOriginal ?? null,
+        'ret' => $ret ?? null
     ]);
+
+    exit;
 }
 ?>
