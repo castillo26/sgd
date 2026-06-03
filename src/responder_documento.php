@@ -82,16 +82,53 @@ if (!is_dir('uploads/temp')) {
     mkdir('uploads/temp', 0777, true);
 }
 
-// Guardar PDF temporal
-$tempName = uniqid() . '_respuesta_temp.pdf';
-$tempPath = 'uploads/temp/' . $tempName;
+// ========================================
+// GUARDAR PDF TEMPORAL
+// ========================================
 
-if (!move_uploaded_file($archivo['tmp_name'], $tempPath)) {
+$tempName = uniqid() . '_respuesta_temp.pdf';
+$tempOriginal = 'uploads/temp/' . $tempName;
+
+if (!move_uploaded_file($archivo['tmp_name'], $tempOriginal)) {
     echo json_encode([
         'success' => false,
         'message' => 'Error al guardar archivo temporal'
     ]);
     exit;
+}
+
+// ========================================
+// CONVERTIR PDF A VERSION COMPATIBLE FPDI
+// ========================================
+
+$tempCompatible = 'uploads/temp/' . uniqid() . '_compatible.pdf';
+
+// Ruta completa de Ghostscript
+$gsPath = '"C:\\Program Files (x86)\\gs\\gs10.07.1\\bin\\gswin32c.exe"';
+
+$gsCommand = $gsPath
+    . ' -sDEVICE=pdfwrite'
+    . ' -dCompatibilityLevel=1.4'
+    . ' -dNOPAUSE'
+    . ' -dQUIET'
+    . ' -dBATCH'
+    . ' -sOutputFile="' . $tempCompatible . '"'
+    . ' "' . $tempOriginal . '"';
+
+exec($gsCommand, $output, $returnVar);
+
+// Si la conversión funciona, usar PDF compatible
+if ($returnVar === 0 && file_exists($tempCompatible)) {
+
+    // borrar original temporal
+    unlink($tempOriginal);
+
+    $tempPath = $tempCompatible;
+
+} else {
+
+    // usar original si falla Ghostscript
+    $tempPath = $tempOriginal;
 }
 
 try {
@@ -125,6 +162,27 @@ try {
     $rutaOriginal = $doc['archivo'];
 
     if ($rutaOriginal && file_exists($rutaOriginal)) {
+
+        $tempOriginalCompatible =
+    'uploads/temp/' . uniqid() . '_original_compatible.pdf';
+
+$gsCommand = $gsPath
+    . ' -sDEVICE=pdfwrite'
+    . ' -dCompatibilityLevel=1.4'
+    . ' -dNOPAUSE'
+    . ' -dQUIET'
+    . ' -dBATCH'
+    . ' -sOutputFile="' . $tempOriginalCompatible . '"'
+    . ' "' . $rutaOriginal . '"';
+
+exec($gsCommand, $output, $returnVar);
+
+if (
+    $returnVar === 0 &&
+    file_exists($tempOriginalCompatible)
+) {
+    $rutaOriginal = $tempOriginalCompatible;
+}
 
         $pageCount = $pdf->setSourceFile($rutaOriginal);
 
@@ -227,6 +285,13 @@ try {
     $stmt->close();
 
 } catch (Exception $e) {
+
+    if (
+    isset($tempOriginalCompatible) &&
+    file_exists($tempOriginalCompatible)
+) {
+    unlink($tempOriginalCompatible);
+}
 
     // Limpiar temporal
     if (file_exists($tempPath)) {

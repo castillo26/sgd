@@ -46,17 +46,50 @@ if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0777, true);
 }
 
-// Generar nombre único para el archivo
-$nombreArchivo = uniqid() . '_' . basename($archivo['name']);
-$rutaArchivo = $uploadDir . $nombreArchivo;
+// ===============================
+// GUARDAR TEMPORAL
+// ===============================
 
-// Mover el archivo
-if (!move_uploaded_file($archivo['tmp_name'], $rutaArchivo)) {
+$tempOriginal = $uploadDir . uniqid() . '_temp.pdf';
+
+if (!move_uploaded_file($archivo['tmp_name'], $tempOriginal)) {
+
     echo json_encode([
         'success' => false,
-        'message' => 'Error al guardar el archivo'
+        'message' => 'Error al guardar archivo temporal'
     ]);
     exit;
+}
+
+// ===============================
+// CONVERTIR CON GHOSTSCRIPT
+// ===============================
+
+$nombreArchivo = uniqid() . '_compatible.pdf';
+$rutaArchivo = $uploadDir . $nombreArchivo;
+
+$gsPath = '"C:\\Program Files (x86)\\gs\\gs10.07.1\\bin\\gswin32c.exe"';
+
+$gsCommand = $gsPath
+    . ' -sDEVICE=pdfwrite'
+    . ' -dCompatibilityLevel=1.4'
+    . ' -dNOPAUSE'
+    . ' -dQUIET'
+    . ' -dBATCH'
+    . ' -sOutputFile="' . $rutaArchivo . '"'
+    . ' "' . $tempOriginal . '"';
+
+exec($gsCommand, $output, $returnVar);
+
+// Si Ghostscript falla usar original
+
+if ($returnVar !== 0 || !file_exists($rutaArchivo)) {
+
+    rename($tempOriginal, $rutaArchivo);
+
+} else {
+
+    unlink($tempOriginal);
 }
 
 // Insertar en la base de datos
