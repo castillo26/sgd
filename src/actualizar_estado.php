@@ -45,6 +45,123 @@ try {
 
     } elseif ($estado === 'derivado') {
 
+<<<<<<< Updated upstream
+=======
+    $rutaFinal = null;
+
+    // ===================================================
+    // SI HAY PDF ADJUNTO → UNIRLO CON EL ORIGINAL
+    // ===================================================
+
+    if ($pdfAdjuntoExiste) {
+
+        $stmtDoc = $conn->prepare("
+            SELECT archivo
+            FROM documentos
+            WHERE id = ?
+        ");
+
+        $stmtDoc->bind_param("i", $id);
+        $stmtDoc->execute();
+
+        $docResult = $stmtDoc->get_result();
+        $documento = $docResult->fetch_assoc();
+
+        $stmtDoc->close();
+
+        if ($documento && file_exists($documento['archivo'])) {
+
+            if (!is_dir('uploads/temp')) {
+                mkdir('uploads/temp', 0777, true);
+            }
+
+            $tempAdjunto =
+                'uploads/temp/' .
+                uniqid() .
+                '_adjunto.pdf';
+
+            move_uploaded_file(
+                $_FILES['pdf_adjunto']['tmp_name'],
+                $tempAdjunto
+            );
+
+            $rutaOriginal = $documento['archivo'];
+
+            // ==================================
+            // UNIR PDFs
+            // ==================================
+
+            $pdf = new Fpdi();
+
+            // PDF ADJUNTO PRIMERO
+
+            $pages =
+                $pdf->setSourceFile($tempAdjunto);
+
+            for ($i = 1; $i <= $pages; $i++) {
+
+                $tpl = $pdf->importPage($i);
+
+                $size =
+                    $pdf->getTemplateSize($tpl);
+
+                $pdf->AddPage(
+                    $size['orientation'],
+                    [$size['width'], $size['height']]
+                );
+
+                $pdf->useTemplate($tpl);
+            }
+
+            // PDF ORIGINAL DESPUÉS
+
+            if (!file_exists($rutaOriginal)) {
+    throw new Exception(
+        "No existe PDF original"
+    );
+}
+
+if (filesize($rutaOriginal) <= 0) {
+    throw new Exception(
+        "PDF original vacío"
+    );
+}
+
+            $pages =
+                $pdf->setSourceFile($rutaOriginal);
+
+            for ($i = 1; $i <= $pages; $i++) {
+
+                $tpl = $pdf->importPage($i);
+
+                $size =
+                    $pdf->getTemplateSize($tpl);
+
+                $pdf->AddPage(
+                    $size['orientation'],
+                    [$size['width'], $size['height']]
+                );
+
+                $pdf->useTemplate($tpl);
+            }
+
+            $rutaFinal =
+                'uploads/' .
+                uniqid() .
+                '_derivado.pdf';
+
+            $pdf->Output('F', $rutaFinal);
+
+            if (file_exists($tempAdjunto)) {
+                unlink($tempAdjunto);
+            }
+
+        }
+    }
+
+    if ($rutaFinal) {
+
+>>>>>>> Stashed changes
         $stmt = $conn->prepare("
             UPDATE documentos 
             SET estado = 'enviado', area_destino_id = ?, comentario = NULL, fecha_actualizacion = NOW() 
@@ -137,7 +254,13 @@ try {
 
     echo json_encode([
         'success' => false,
+<<<<<<< Updated upstream
         'message' => 'Error: ' . $e->getMessage()
+=======
+        'message' => $e->getMessage(),
+        'tempAdjunto' => $tempAdjunto ?? null,
+        'rutaOriginal' => $rutaOriginal ?? null
+>>>>>>> Stashed changes
     ]);
 }
 ?>

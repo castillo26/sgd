@@ -67,6 +67,7 @@ if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0777, true);
 }
 
+<<<<<<< Updated upstream
 // Generar nombre único para el archivo
 $nombreArchivo = uniqid() . '_' . basename($archivo['name']);
 $rutaArchivo = $uploadDir . $nombreArchivo;
@@ -77,6 +78,18 @@ if (!move_uploaded_file($archivo['tmp_name'], $rutaArchivo)) {
         'success' => false,
         'message' => 'Error al guardar el archivo'
     ]);
+=======
+$nombreArchivo = uniqid() . '_subsanado.pdf';
+$rutaArchivo = $uploadDir . $nombreArchivo;
+
+if (!move_uploaded_file($archivo['tmp_name'], $rutaArchivo)) {
+
+    echo json_encode([
+        'success' => false,
+        'message' => 'Error al guardar archivo'
+    ]);
+
+>>>>>>> Stashed changes
     exit;
 }
 

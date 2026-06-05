@@ -1,0 +1,12 @@
+{
+    "name": "sgd/backend",
+    "description": "SGD - Sistema de Gestión Documental",
+    "type": "project",
+    "require": {
+        "setasign/fpdi": "^2.6",
+        "setasign/fpdf": "^1.8"
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}

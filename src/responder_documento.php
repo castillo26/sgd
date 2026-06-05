@@ -72,12 +72,87 @@ if (!move_uploaded_file($archivo['tmp_name'], $rutaArchivo)) {
     exit;
 }
 
+<<<<<<< Updated upstream
 try {
     // Actualizar el documento (similar a subsanar):
     // - estado cambia a 'finalizado'
     // - archivo se actualiza con el nuevo PDF de respuesta
     // - comentario se limpia
     // - area_origen_id y area_destino_id se mantienen (el documento sigue vinculado al origen original)
+=======
+$tempPath = $tempOriginal;
+
+try {
+
+    // Crear PDF unido
+    $pdf = new Fpdi();
+
+    // =========================
+    // 1. PDF RESPUESTA
+    // =========================
+
+    $pageCountRespuesta = $pdf->setSourceFile($tempPath);
+
+    for ($i = 1; $i <= $pageCountRespuesta; $i++) {
+
+        $tpl = $pdf->importPage($i);
+
+        $size = $pdf->getTemplateSize($tpl);
+
+        $pdf->AddPage(
+            $size['orientation'],
+            [$size['width'], $size['height']]
+        );
+
+        $pdf->useTemplate($tpl);
+    }
+
+    // =========================
+    // 2. PDF ORIGINAL
+    // =========================
+    $rutaOriginal = $doc['archivo'];
+
+    if ($rutaOriginal && file_exists($rutaOriginal)) {
+
+        $pageCount = $pdf->setSourceFile($rutaOriginal);
+
+        for ($i = 1; $i <= $pageCount; $i++) {
+
+            $tpl = $pdf->importPage($i);
+
+            $size = $pdf->getTemplateSize($tpl);
+
+            $pdf->AddPage(
+                $size['orientation'],
+                [$size['width'], $size['height']]
+            );
+
+            $pdf->useTemplate($tpl);
+        }
+    }
+
+    // =========================
+    // Guardar PDF final
+    // =========================
+    $nombreFinal = uniqid() . '_respuesta_unida.pdf';
+    $rutaFinal = 'uploads/' . $nombreFinal;
+
+    $pdf->Output('F', $rutaFinal);
+
+    // Borrar temporal
+    if (file_exists($tempPath)) {
+        unlink($tempPath);
+    }
+
+    // =========================
+    // ACTUALIZAR DOCUMENTO
+    // =========================
+    $estado = 'pendiente_evaluacion';
+
+    $areaOrigenActual = $doc['area_origen_id'];
+    $areaDestinoActual = $doc['area_destino_id'];
+
+>>>>>>> Stashed changes
     $stmt = $conn->prepare("
         UPDATE documentos
         SET
@@ -118,6 +193,15 @@ try {
     $conn->close();
 
 } catch (Exception $e) {
+<<<<<<< Updated upstream
+=======
+
+    // Limpiar temporal
+    if (file_exists($tempPath)) {
+        unlink($tempPath);
+    }
+
+>>>>>>> Stashed changes
     echo json_encode([
         'success' => false,
         'message' => 'Error: ' . $e->getMessage()
