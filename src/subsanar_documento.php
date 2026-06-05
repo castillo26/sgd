@@ -67,53 +67,18 @@ if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0777, true);
 }
 
-// Crear carpeta temporal
-if (!is_dir('uploads/temp')) {
-    mkdir('uploads/temp', 0777, true);
-}
+$nombreArchivo = uniqid() . '_subsanado.pdf';
+$rutaArchivo = $uploadDir . $nombreArchivo;
 
-// Guardar temporal
-$tempOriginal = 'uploads/temp/' . uniqid() . '_subsanacion.pdf';
-
-if (!move_uploaded_file($archivo['tmp_name'], $tempOriginal)) {
+if (!move_uploaded_file($archivo['tmp_name'], $rutaArchivo)) {
 
     echo json_encode([
         'success' => false,
-        'message' => 'Error al guardar archivo temporal'
+        'message' => 'Error al guardar archivo'
     ]);
 
     exit;
 }
-
-// PDF final
-$nombreArchivo = uniqid() . '_subsanado.pdf';
-$rutaArchivo = $uploadDir . $nombreArchivo;
-
-// Ghostscript
-$gsPath = '"C:\\Program Files (x86)\\gs\\gs10.07.1\\bin\\gswin32c.exe"';
-
-$gsCommand =
-    $gsPath .
-    ' -sDEVICE=pdfwrite' .
-    ' -dCompatibilityLevel=1.4' .
-    ' -dNOPAUSE' .
-    ' -dQUIET' .
-    ' -dBATCH' .
-    ' -sOutputFile="' . $rutaArchivo . '"' .
-    ' "' . $tempOriginal . '"';
-
-exec($gsCommand, $output, $returnVar);
-
-// Si falla Ghostscript usar original
-if ($returnVar !== 0 || !file_exists($rutaArchivo)) {
-
-    $rutaArchivo = $uploadDir . uniqid() . '_subsanado_original.pdf';
-
-    copy($tempOriginal, $rutaArchivo);
-}
-
-// borrar temporal
-unlink($tempOriginal);
 
 try {
     // Obtener el estado actual del documento

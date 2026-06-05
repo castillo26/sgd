@@ -90,102 +90,7 @@ try {
                 $tempAdjunto
             );
 
-            $gsPath =
-                '"C:\\Program Files (x86)\\gs\\gs10.07.1\\bin\\gswin32c.exe"';
-
-            // ==========================================
-// CONVERTIR ADJUNTO A PDF COMPATIBLE
-// ==========================================
-
-$adjuntoCompatible =
-    'uploads/temp/' .
-    uniqid() .
-    '_adjunto_compatible.pdf';
-
-$cmd =
-    $gsPath .
-    ' -sDEVICE=pdfwrite' .
-    ' -dCompatibilityLevel=1.4' .
-    ' -dNOPAUSE' .
-    ' -dQUIET' .
-    ' -dBATCH' .
-    ' -sOutputFile="' .
-    $adjuntoCompatible .
-    '" "' .
-    $tempAdjunto .
-    '"';
-
-exec($cmd, $out, $ret);
-
-if (
-    $ret === 0 &&
-    file_exists($adjuntoCompatible) &&
-    filesize($adjuntoCompatible) > 0
-) {
-
-    unlink($tempAdjunto);
-
-    $tempAdjunto = $adjuntoCompatible;
-
-} else {
-
-    throw new Exception(
-        'Ghostscript no pudo convertir el PDF adjunto'
-    );
-}
-
-            // PDF original compatible
-
             $rutaOriginal = $documento['archivo'];
-
-            $originalCompatible =
-                'uploads/temp/' .
-                uniqid() .
-                '_original_compatible.pdf';
-
-            $cmd =
-                $gsPath .
-                ' -sDEVICE=pdfwrite' .
-                ' -dCompatibilityLevel=1.4' .
-                ' -dNOPAUSE' .
-                ' -dQUIET' .
-                ' -dBATCH' .
-                ' -sOutputFile="' .
-                $originalCompatible .
-                '" "' .
-                $rutaOriginal .
-                '"';
-
-            exec($cmd, $out, $ret);
-
-if (
-    $ret === 0 &&
-    file_exists($originalCompatible) &&
-    filesize($originalCompatible) > 0
-) {
-
-    $rutaOriginal = $originalCompatible;
-
-} else {
-
-    throw new Exception(
-        'Ghostscript no pudo convertir el PDF original'
-    );
-}
-
-            if (!file_exists($tempAdjunto)) {
-    throw new Exception(
-        'No existe adjunto convertido: ' .
-        $tempAdjunto
-    );
-}
-
-if (!file_exists($rutaOriginal)) {
-    throw new Exception(
-        'No existe original convertido: ' .
-        $rutaOriginal
-    );
-}
 
             // ==================================
             // UNIR PDFs
@@ -194,18 +99,6 @@ if (!file_exists($rutaOriginal)) {
             $pdf = new Fpdi();
 
             // PDF ADJUNTO PRIMERO
-
-            if (!file_exists($tempAdjunto)) {
-    throw new Exception(
-        "No existe PDF adjunto convertido"
-    );
-}
-
-if (filesize($tempAdjunto) <= 0) {
-    throw new Exception(
-        "PDF adjunto vacío"
-    );
-}
 
             $pages =
                 $pdf->setSourceFile($tempAdjunto);
@@ -268,9 +161,7 @@ if (filesize($rutaOriginal) <= 0) {
                 unlink($tempAdjunto);
             }
 
-            if (file_exists($originalCompatible)) {
-                unlink($originalCompatible);
-            }
+
         }
     }
 
@@ -398,8 +289,7 @@ if (filesize($rutaOriginal) <= 0) {
         'success' => false,
         'message' => $e->getMessage(),
         'tempAdjunto' => $tempAdjunto ?? null,
-        'rutaOriginal' => $rutaOriginal ?? null,
-        'ret' => $ret ?? null
+        'rutaOriginal' => $rutaOriginal ?? null
     ]);
 
     exit;
