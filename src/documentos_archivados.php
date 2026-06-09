@@ -21,11 +21,17 @@ $stmt = $conn->prepare("
     FROM documentos d
     LEFT JOIN areas ao ON d.area_origen_id = ao.id
     LEFT JOIN areas ad ON d.area_destino_id = ad.id
-    WHERE d.area_destino_id = ? AND d.estado = 'finalizado'
+    WHERE
+(
+    d.area_origen_id = ?
+    OR
+    d.area_destino_id = ?
+)
+AND d.estado = 'finalizado'
     ORDER BY d.fecha_subida DESC
 ");
 
-$stmt->bind_param("i", $area);
+$stmt->bind_param("ii", $area, $area);
 $stmt->execute();
 $result = $stmt->get_result();
 
